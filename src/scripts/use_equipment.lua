@@ -1,4 +1,4 @@
-function init()
+local function init()
   global.data = global.data or {}
 end
 
@@ -7,7 +7,7 @@ script.on_configuration_changed(init)
 
 --- checks if the player has the equipment equipped
 ---@param player LuaPlayer
-function hasEquipment(player)
+local function hasEquipment(player)
   local inventory = player.get_inventory(defines.inventory.character_armor)
   ---@type LuaItemStack
   local armor = not inventory.is_empty() and inventory[1] or nil
@@ -30,7 +30,7 @@ end
 
 --- check if the player is standing on top of a rail
 ---@param player LuaPlayer
-function at_rail(player)
+local function at_rail(player)
   local res = player.surface.find_entities_filtered({
     position = player.position,
     radius = 3,
@@ -41,14 +41,14 @@ end
 
 --- leave the vehicle
 ---@param player LuaPlayer
-function unmount(player)
+local function unmount(player)
   -- request unmount, and wait for base-mod
   global.data[player.index].unmount = player.position
 end
 
 --- enter the vehicle
 ---@param player LuaPlayer
-function mount(player)
+local function mount(player)
   local position = player.position
   local direction = player.character.direction
   -- teleport character to any position to make space for creating the entity
@@ -86,7 +86,7 @@ script.on_event(shared.key, function(event)
       local jetpacks = remote.interfaces["jetpack"] and remote.call("jetpack", "get_jetpacks", {surface_index=player.surface.index})
       if jetpacks and jetpacks[player.character.unit_number] then
         -- also cannot mount if jetpack is in use
-        player.create_local_flying_text({ text = { 'flying-text.jetpack-in-use' }, position = player.position })
+        player.create_local_flying_text({ text = { 'flying-text.'..shared.name..'-jetpack-in-use' }, position = player.position })
       else
         mount(player)
       end
@@ -121,28 +121,42 @@ script.on_event(shared.rotate, function(event)
   end
 end)
 
--- checking if equipment is still valid and has power
-script.on_nth_tick(60, function(event)
+-- checking if equipment is still valid and has enough power
+script.on_nth_tick(30, function(event)
   ---@param player LuaPlayer
   for _, player in pairs(game.players) do
-    if global.data[player.index] and global.data[player.index].motorcar and not (
+    -- check only needed if in use
+    local invalid = global.data[player.index] and global.data[player.index].motorcar
+
+    -- check only if equipped
+    if invalid and
       player.character and player.driving and
-        global.data[player.index].motorcar.valid and
-        hasEquipment(player) and global.data[player.index].equipment.energy > 0
-    ) then
+      global.data[player.index].motorcar.valid and
+      hasEquipment(player)
+    then
+      -- drain energy: half of the input flow limit (per tick) is the drain -> subtract it
+      ---@type LuaEquipment
+      local equipment = global.data[player.index].equipment;
+      if equipment.energy > 0 then
+        equipment.energy = math.max(equipment.energy - equipment.prototype.energy_source.input_flow_limit * 30 / 2, 0)
+      end
+      invalid = equipment.energy == 0
+    end
+
+    if invalid then
       -- player is still active and driving -> unmount
       if player.character and player.driving then
         if global.data[player.index].equipment and global.data[player.index].equipment.valid and global.data[player.index].equipment.energy == 0 then
-          player.create_local_flying_text({ text = { 'flying-text.no-power' }, position = player.position })
+          player.create_local_flying_text({ text = { 'flying-text.'..shared.name..'-no-power' }, position = player.position })
         else
-          player.create_local_flying_text({ text = { 'flying-text.missing-equipment' }, position = player.position })
+          player.create_local_flying_text({ text = { 'flying-text.'..shared.name..'-missing-equipment' }, position = player.position })
         end
         unmount(player)
         player.driving = false
       else
         -- otherwise: remove locomotive and clear data (if the player is still active and not driving, he could not enter -> show hint)
         if player.character then
-          player.create_local_flying_text({ text = { 'flying-text.could-not-enter' }, position = global.data[player.index].motorcar.position })
+          player.create_local_flying_text({ text = { 'flying-text.'..shared.name..'-could-not-enter' }, position = global.data[player.index].motorcar.position })
         end
         global.data[player.index].motorcar.destroy()
         global.data[player.index] = nil

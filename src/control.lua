@@ -3,7 +3,7 @@ shared = require "shared"
 require "scripts.use_equipment"
 local informatron = require "scripts.informatron"
 
-remote.add_interface("railway-motor-car", {
+remote.add_interface(shared.name, {
   -- informatron implementation
   informatron_menu = function(data)
     return informatron.menu(data.player_index)

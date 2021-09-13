@@ -26,18 +26,19 @@ end
 
 local data = {}
 
-data.equipment = 'railway-motor-car-equipment'
-data.motorcar = 'railway-motor-car-train'
-data.corpse = 'railway-motor-car-corpse'
-data.nuclear_equipment = 'railway-motor-car-nuclear-equipment'
-data.nuclear_motorcar = 'railway-motor-car-nuclear-train'
+data.name = 'railway-motor-car'
+data.equipment = data.name..'-equipment'
+data.motorcar = data.name..'-train'
+data.corpse = data.name..'-corpse'
+data.nuclear_equipment = data.name..'-nuclear-equipment'
+data.nuclear_motorcar = data.name..'-nuclear-train'
 data.map = {}
 data.map[data.equipment] = data.motorcar
 data.map[data.nuclear_equipment] = data.nuclear_motorcar
 
 
-data.key = 'railway-motor-car-key'
-data.rotate = 'railway-motor-car-rotate'
+data.key = data.name..'-key'
+data.rotate = data.name..'-rotate'
 
 data.root = '__railway-motor-car__'
 

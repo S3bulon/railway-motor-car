@@ -1,6 +1,5 @@
--- use belt immunity equipment b/c it uses energy
----@type Prototype_BeltImmunityEquipment
-local equipment = table.deepcopy(data.raw['belt-immunity-equipment']['belt-immunity-equipment'])
+---@type Prototype_BatteryEquipment
+local equipment = table.deepcopy(data.raw['battery-equipment']['battery-equipment'])
 
 equipment.name = shared.equipment
 equipment.sprite.filename = motorcar.icon
@@ -9,25 +8,28 @@ equipment.sprite.height = motorcar.icon_size
 equipment.sprite.hr_version = nil
 equipment.shape.width = 2
 equipment.shape.height = 2
-equipment.energy_consumption = '200kW'
-equipment.energy_source.input_flow_limit='400kW'
+equipment.energy_source = {
+  type = 'electric',
+  input_flow_limit = '400kW',
+  buffer_capacity = '2MJ',
+  usage_priority = 'secondary-input',
+}
 equipment.take_result = shared.equipment
 equipment.order = 'g-h-a'
 
 -- printTable('equipment', equipment)
 
----@type Prototype_BeltImmunityEquipment
+---@type Prototype_BatteryEquipment
 local nuclear_equipment = table.deepcopy(equipment)
 nuclear_equipment.name = shared.nuclear_equipment
 nuclear_equipment.sprite.filename = nuclear_motorcar.icon
 nuclear_equipment.sprite.width = nuclear_motorcar.icon_size
 nuclear_equipment.sprite.height = nuclear_motorcar.icon_size
-nuclear_equipment.energy_consumption = '300kW'
-nuclear_equipment.energy_source.input_flow_limit='600kW'
+nuclear_equipment.energy_source.input_flow_limit = '600kW'
 nuclear_equipment.take_result = shared.nuclear_equipment
 
 ---@type Prototype_Item
-local item = table.deepcopy(data.raw['item']['belt-immunity-equipment'])
+local item = table.deepcopy(data.raw['item']['battery-equipment'])
 
 item.name = shared.equipment
 item.icon = motorcar.icon
@@ -130,3 +132,17 @@ data:extend {
   technology, nuclear_technology,
   key, rotate
 }
+
+if not mods["informatron"] then
+  ---@type Prototype_TipsAndTricksItem
+  local tips_and_tricks = {
+    type = 'tips-and-tricks-item',
+    name = shared.name,
+    tag = '[item=railway-motor-car-equipment]',
+    trigger = {
+      type = 'research',
+      technology = shared.equipment
+    }
+  }
+  data:extend {tips_and_tricks}
+end
