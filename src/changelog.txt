@@ -1,0 +1,22 @@
+---------------------------------------------------------------------------------------------------
+Version: 0.1.3
+Date: 25.12.2020
+  Changes:
+    - Updated mod to work with Factorio 1.1 (fixed graphics)
+    - Increased speed of the motorcar
+    - Added DE-translation for the mod-name & -description.
+  Fixes:
+    - Prevented creation of the motorcar while entering a Spidertron which is standing on the rails.
+---------------------------------------------------------------------------------------------------
+Version: 0.1.4
+Date: 06.01.2021
+  Changes:
+    - Added a new technology "Nuclear Railway Motor Car" to enable a new equipment which uses the acceleration- and speed-boost of nuclear fuel.
+    - Slightly increased speed of the regular motorcar
+---------------------------------------------------------------------------------------------------
+Version: 0.1.5
+Date: 13.01.2021
+  Changes:
+    - Added support for the Jetpack and Informatron mod
+  Fixes:
+    - Fixed creating the motorcar if it could not be entered automatically

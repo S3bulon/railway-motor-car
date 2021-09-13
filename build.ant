@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="RailwayMotorCar">
+  <property environment="env"/>
+  <property name="source" location="src"/>
+  <property name="target" location="${env.APPDATA}/Factorio/mods"/>
+
+  <target name="deploy_zip" depends="load_info" description="deploy as a zip to the out directory (for uploading)">
+    <delete file="out/${filename}.zip" failonerror="false"/>
+    <zip destfile="out/${filename}.zip">
+      <zipfileset dir="src" prefix="${filename}"/>
+      <zipfileset dir="resources" prefix="${filename}"/>
+    </zip>
+  </target>
+
+  <target name="deploy_local" depends="load_info" description="deploy to the local factorio mod directory (for testing)">
+    <copy todir="${target}/${name}" failonerror="false" overwrite="true">
+      <fileset dir="src"/>
+      <fileset dir="resources"/>
+    </copy>
+  </target>
+
+  <target name="load_info">
+    <script language="javascript">
+      var content = new java.lang.String(java.nio.file.Files.readAllBytes(java.nio.file.Paths.get("src/info.json")), "UTF-8");
+      var json = eval("(" + content + ")");
+      for (key in json)
+        project.setProperty(key, json[key]);
+    </script>
+
+    <property name="filename">${name}_${version}</property>
+  </target>
+</project>
