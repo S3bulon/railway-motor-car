@@ -20,3 +20,8 @@ Date: 13.01.2021
     - Added support for the Jetpack and Informatron mod
   Fixes:
     - Fixed creating the motorcar if it could not be entered automatically
+---------------------------------------------------------------------------------------------------
+Version: 0.1.6
+Date: 13.09.2021
+  Fixes:
+    - Fixed global function causing crashes
