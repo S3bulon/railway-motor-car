@@ -1,4 +1,4 @@
 shared = require "shared"
 
-require "data.motorcar"
-require "data.equipment"
+require "prototypes.motorcar"
+require "prototypes.equipment"

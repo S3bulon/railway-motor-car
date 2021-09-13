@@ -1,7 +1,7 @@
 shared = require "shared"
 
-require "script.use_equipment"
-local informatron = require "script.informatron"
+require "scripts.use_equipment"
+local informatron = require "scripts.informatron"
 
 remote.add_interface("railway-motor-car", {
   -- informatron implementation
