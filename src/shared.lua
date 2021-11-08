@@ -6,9 +6,9 @@ function printTable(desc, table, indent)
   indent = indent or ''
 
   if game then
-    game.print(indent .. desc .. ':')
+    game.print(indent .. tostring(desc) .. ':')
   else
-    log(indent .. desc .. ':')
+    log(indent .. tostring(desc) .. ':')
   end
 
   for key, value in pairs(table) do

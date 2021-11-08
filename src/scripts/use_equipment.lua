@@ -73,6 +73,27 @@ local function mount(player)
   end
 end
 
+-- check if mounting is allowed (compatibility for other mods)
+local function can_mount(player)
+  -- cannot mount if jetpack is in use
+  local jetpacks = remote.interfaces["jetpack"] and remote.call("jetpack", "get_jetpacks", {surface_index=player.surface.index})
+  if jetpacks and jetpacks[player.character.unit_number] then
+    player.create_local_flying_text({ text = { 'flying-text.'..shared.name..'-jetpack-in-use' }, position = player.position })
+    return false
+  end
+
+  -- train tunnels: cannot mount b/c <enter vehicle> is used for changing surfaces
+  if game.active_mods["traintunnels"] and table_size(player.surface.find_entities_filtered({
+      position = player.position,
+      radius = 10, -- large radius
+      name = { 'traintunnel', 'traintunnelup', 'traintunneldown' }
+    })) > 0 then
+    return false
+  end
+
+  return true
+end
+
 -- 'enter vehicle'-button
 script.on_event(shared.key, function(event)
   local player = game.get_player(event.player_index)
@@ -83,11 +104,7 @@ script.on_event(shared.key, function(event)
 
     elseif not player.driving and at_rail(player) and hasEquipment(player) and global.data[player.index].equipment.energy > 0 then
       -- mount (only allowed if equipment is equipped and player is standing on top of a rail)
-      local jetpacks = remote.interfaces["jetpack"] and remote.call("jetpack", "get_jetpacks", {surface_index=player.surface.index})
-      if jetpacks and jetpacks[player.character.unit_number] then
-        -- also cannot mount if jetpack is in use
-        player.create_local_flying_text({ text = { 'flying-text.'..shared.name..'-jetpack-in-use' }, position = player.position })
-      else
+      if can_mount(player) then
         mount(player)
       end
     end
@@ -97,17 +114,25 @@ end)
 -- event for entering or leaving a vehicle (via base-mod)
 script.on_event(defines.events.on_player_driving_changed_state, function(event)
   local player = game.get_player(event.player_index)
-  -- remove motorcar if unmounting was requested
-  if global.data[player.index] and global.data[player.index].unmount and global.data[player.index].motorcar then
-    global.data[player.index].motorcar.destroy()
+  local data = global.data[player.index]
+  -- remove motorcar if unmounting was requested (and the player is not driving anymore)
+  if data and data.unmount and data.motorcar and not player.driving then
+    data.motorcar.destroy()
     -- move character to exact place as before
-    player.character.teleport(global.data[player.index].unmount)
+    player.character.teleport(data.unmount)
     global.data[player.index] = nil
 
   -- mounted another entity (e.g. a spidertron standing on top of the rail) -> destroy created motorcar
-  elseif global.data[player.index] and global.data[player.index].motorcar and not global.data[player.index].motorcar.get_driver() then
-    global.data[player.index].motorcar.destroy()
-    global.data[player.index] = nil
+  -- or not valid anymore - may have been swapped - replace
+  elseif data and data.motorcar and (not data.motorcar.valid or not data.motorcar.get_driver()) then
+    if player.driving and player.vehicle.name == shared.map[data.equipment.name] then
+      data.motorcar.destroy()
+      data.motorcar = player.vehicle
+      data.unmount = nil
+    else
+      data.motorcar.destroy()
+      global.data[player.index] = nil
+    end
   end
 end)
 
