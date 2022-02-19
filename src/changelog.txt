@@ -31,3 +31,10 @@ Date: 13.09.2021
   Changes:
     - Replaced internal base equipment: no constant power drain, no belt immunity anymore
     - Use tips and tricks if no informatron is available
+---------------------------------------------------------------------------------------------------
+Version: 0.2.1
+Date: 08.11.2021
+  Changes:
+    - Added support for mod "traintunnels"
+  Fixes:
+    - Fixed teleport by destroying & creating the train, as used in traintunnels
