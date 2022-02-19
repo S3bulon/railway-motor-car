@@ -39,7 +39,7 @@ motorcar.energy_source = { type = "void" }
 
 -- smaller version of the train
 --motorcar.collision_box = { { -0.3, -1.3 }, { 0.3, 1.3 } }
-motorcar.collision_box = { { -1.2, -2.1 }, { 1.2, 2.1 } }
+motorcar.collision_box = { { -0.6, -2.1 }, { 0.6, 2.1 } }
 motorcar.selection_box = { { -1, -2 }, { 1, 2 } }
 motorcar.drawing_box = { { -1, -3 }, { 1, 2 } }
 motorcar.joint_distance = 2
