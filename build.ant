@@ -17,6 +17,8 @@
       <fileset dir="src"/>
       <fileset dir="resources"/>
     </copy>
+    <!-- logging only for local tests -->
+    <copy file="defs/debug_local.lua" tofile="${target}/${name}/debug.lua" overwrite="true"/>
   </target>
 
   <target name="load_info">

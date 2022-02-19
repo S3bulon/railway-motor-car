@@ -1,28 +1,4 @@
-function printTable(desc, table, indent)
-  if not table then
-    return
-  end
-
-  indent = indent or ''
-
-  if game then
-    game.print(indent .. tostring(desc) .. ':')
-  else
-    log(indent .. tostring(desc) .. ':')
-  end
-
-  for key, value in pairs(table) do
-    if type(value) == 'table' then
-      printTable(key, value, indent .. '  ')
-    else
-      if game then
-        game.print(indent .. '  ' .. tostring(key) .. ': ' .. tostring(value))
-      else
-        log(indent .. '  ' .. tostring(key) .. ': ' .. tostring(value))
-      end
-    end
-  end
-end
+require "debug"
 
 local data = {}
 
