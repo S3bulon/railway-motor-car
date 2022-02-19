@@ -111,6 +111,15 @@ script.on_event(shared.key, function(event)
   end
 end)
 
+local function table_contains(table, to_find)
+  for _, v in pairs(table) do
+    if v == to_find then
+      return true
+    end
+  end
+  return false
+end
+
 -- event for entering or leaving a vehicle (via base-mod)
 script.on_event(defines.events.on_player_driving_changed_state, function(event)
   local player = game.get_player(event.player_index)
@@ -132,6 +141,16 @@ script.on_event(defines.events.on_player_driving_changed_state, function(event)
     else
       data.motorcar.destroy()
       global.data[player.index] = nil
+    end
+  -- mounting an unused motor car -> link it (or destroy it)
+  elseif event.entity and table_contains(shared.map, event.entity.name) then
+    if hasEquipment(player) then
+      event.entity.color = player.color
+      global.data[player.index].motorcar = event.entity
+    else
+      player.driving = false
+      event.entity.destroy()
+      player.create_local_flying_text({ text = { 'flying-text.'..shared.name..'-missing-equipment' }, position = player.position })
     end
   end
 end)
