@@ -178,6 +178,9 @@ script.on_nth_tick(30, function(event)
         end
         unmount(player)
         player.driving = false
+      elseif not global.data[player.index].motorcar.valid then
+        -- invalid by any unknown cause -> simply remove link
+        global.data[player.index] = nil
       else
         -- otherwise: remove locomotive and clear data (if the player is still active and not driving, he could not enter -> show hint)
         if player.character then

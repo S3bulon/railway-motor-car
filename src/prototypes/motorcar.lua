@@ -24,7 +24,9 @@ motorcar = table.deepcopy(data.raw["locomotive"]["locomotive"])
 motorcar.name = shared.motorcar
 motorcar.corpse = shared.corpse
 
+-- cannot be mined or deconstructed
 motorcar.minable = nil
+motorcar.flags = {"player-creation", "placeable-off-grid", "not-blueprintable", "not-deconstructable"}
 -- player default color
 motorcar.icon = shared.root..'/graphics/equipment/motorcar.png'
 -- smaller with less power, but faster braking
