@@ -96,9 +96,9 @@ function utils.create_equipment(name, nuclear)
   local equipment = table.deepcopy(data.raw["battery-equipment"]["battery-equipment"])
 
   equipment.name = name
-  equipment.sprite.filename = motorcar.icon
-  equipment.sprite.width = motorcar.icon_size
-  equipment.sprite.height = motorcar.icon_size
+  equipment.sprite.filename = motorcar.icon or motorcar.icons[1].icon
+  equipment.sprite.width = motorcar.icon_size or motorcar.icons[1].icon_size
+  equipment.sprite.height = motorcar.icon_size or motorcar.icons[1].icon_size
   equipment.sprite.hr_version = nil
   equipment.shape.width = 2
   equipment.shape.height = 2
@@ -127,6 +127,7 @@ function utils.create_item(name)
 
   item.name = name
   item.icon = motorcar.icon
+  item.icons = motorcar.icons
   item.icon_size = motorcar.icon_size
   item.placed_as_equipment_result = name
   item.order = "g-h-a"

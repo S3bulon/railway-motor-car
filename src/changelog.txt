@@ -52,3 +52,8 @@ Date: 30.04.2022
     - Added support for mods which add their own locomotives. The motor car copies their visuals and speed.
   Changes:
     - Changed internal names of all prototypes to simplify the mod-support
+---------------------------------------------------------------------------------------------------
+Version: 0.3.1
+Date: 30.04.2022
+  Fixes:
+    - Fixed missing icon definition
