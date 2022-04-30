@@ -1,6 +1,10 @@
 local utils = {}
 
 function utils.scale(layer, shiftX, shiftY)
+  if not layer then
+    return
+  end
+
   layer.scale = (layer.scale or 1) * 0.5
 
   layer.shift = layer.shift or {0, 0}
@@ -57,27 +61,27 @@ function utils.create_entity(prototype_name, name, nuclear)
   motorcar.joint_distance = 2
   motorcar.vertical_selection_shift = -0.25
 
-  for _, layer in pairs(motorcar.pictures.layers) do
+  for _, layer in pairs(motorcar.pictures.layers or {}) do
     utils.scale(layer, 0, 0.2)
   end
 
   utils.scale(motorcar.wheels, 0, 0.35)
 
-  for _, layer in pairs(motorcar.front_light) do
+  for _, layer in pairs(motorcar.front_light or {}) do
     utils.scale(layer, 0, -6.0)
   end
 
-  for _, layer in pairs(motorcar.front_light_pictures.layers) do
+  for _, layer in pairs(motorcar.front_light_pictures and motorcar.front_light_pictures.layers or {}) do
     utils.scale(layer, 0, 0.2)
   end
 
-  for _, layer in pairs(motorcar.back_light) do
+  for _, layer in pairs(motorcar.back_light or {}) do
     utils.scale(layer, 0, 0.2)
   end
 
-  utils.scale(motorcar.water_reflection.pictures, 0, 0.8)
+  utils.scale(motorcar.water_reflection and motorcar.water_reflection.pictures, 0, 0.8)
 
-  for _, trigger in pairs(motorcar.stop_trigger) do
+  for _, trigger in pairs(motorcar.stop_trigger or {}) do
     if trigger.offset_deviation then
       trigger.offset_deviation = {
         {trigger.offset_deviation[1][1] * 0.5, trigger.offset_deviation[1][2] * 0.5},

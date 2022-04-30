@@ -57,3 +57,9 @@ Version: 0.3.1
 Date: 30.04.2022
   Fixes:
     - Fixed missing icon definition
+---------------------------------------------------------------------------------------------------
+Version: 0.3.2
+Date: 30.04.2022
+  Fixes:
+    - Fixed wrong icons
+    - Fixed exceptions from missing data

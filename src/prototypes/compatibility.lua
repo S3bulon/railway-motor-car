@@ -18,6 +18,8 @@ for prototype_name, prototype in pairs(data.raw["locomotive"]) do
 
     -- cannot create the recipe without the item
     if prototype_item then
+      log("Creating motorcar for " .. prototype_name)
+
       local name = shared.motorcar_prefix .. prototype_name
       local motorcar = utils.create_entity(prototype_name, name, true)
       motorcar.localised_name = {"", {"entity-name." .. shared.base_motorcar}, " (", {"entity-name." .. prototype_name}, ")"}
@@ -25,9 +27,14 @@ for prototype_name, prototype in pairs(data.raw["locomotive"]) do
 
       local equipment = utils.create_equipment(name, true)
       equipment.localised_name = motorcar.localised_name
+
       local item = utils.create_item(name)
       item.localised_name = motorcar.localised_name
       item.localised_description = {"item-description." .. shared.base_motorcar}
+      -- copy icon of the original b/c they are dynamic
+      item.icon = prototype_item.icon
+      item.icon_size = prototype_item.icon_size
+      item.icons = prototype_item.icons
 
       local recipe = {
         type = "recipe",
@@ -42,8 +49,6 @@ for prototype_name, prototype in pairs(data.raw["locomotive"]) do
           result = name,
           energy_consumption = 4,
         },
-        icon = prototype.icon,
-        icon_size = prototype.icon_size,
         order = "g-h-a"
       }
 
