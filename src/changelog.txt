@@ -45,3 +45,10 @@ Date: 19.02.2022
     - Disabled deconstruction by bots
     - Decreased collision mask to prevent collisions with SE-walls
     - Entering an unused motor car (placed by the editor) binds it to the player
+---------------------------------------------------------------------------------------------------
+Version: 0.3.0
+Date: 30.04.2022
+  Features:
+    - Added support for mods which add their own locomotives. The motor car copies their visuals and speed.
+  Changes:
+    - Changed internal names of all prototypes to simplify the mod-support

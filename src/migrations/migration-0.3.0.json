@@ -1,0 +1,52 @@
+{
+  "entity": [
+    [
+      "railway-motor-car-train",
+      "railway-motor-car-base"
+    ],
+    [
+      "railway-motor-car-nuclear-train",
+      "railway-motor-car-nuclear"
+    ]
+  ],
+  "equipment": [
+    [
+      "railway-motor-car-equipment",
+      "railway-motor-car-base"
+    ],
+    [
+      "railway-motor-car-nuclear-equipment",
+      "railway-motor-car-nuclear"
+    ]
+  ],
+  "item": [
+    [
+      "railway-motor-car-equipment",
+      "railway-motor-car-base"
+    ],
+    [
+      "railway-motor-car-nuclear-equipment",
+      "railway-motor-car-nuclear"
+    ]
+  ],
+  "recipe": [
+    [
+      "railway-motor-car-equipment",
+      "railway-motor-car-base"
+    ],
+    [
+      "railway-motor-car-nuclear-equipment",
+      "railway-motor-car-nuclear"
+    ]
+  ],
+  "technology": [
+    [
+      "railway-motor-car-equipment",
+      "railway-motor-car-base"
+    ],
+    [
+      "railway-motor-car-nuclear-equipment",
+      "railway-motor-car-nuclear"
+    ]
+  ]
+}

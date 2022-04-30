@@ -2,8 +2,17 @@ local function init()
   global.data = global.data or {}
 end
 
+local function config_changed()
+  init()
+
+  -- load additional trains added by compatibility.lua
+  for _, force in pairs(game.forces) do
+    force.reset_technology_effects()
+  end
+end
+
 script.on_init(init)
-script.on_configuration_changed(init)
+script.on_configuration_changed(config_changed)
 
 --- checks if the player has the equipment equipped
 ---@param player LuaPlayer
@@ -15,7 +24,7 @@ local function hasEquipment(player)
   ---@type LuaEquipment[]
   local equipments = armor and armor.grid and armor.grid.equipment or {}
   for _, equipment in pairs(equipments) do
-    if shared.map[equipment.name] and equipment.valid then
+    if shared.is_a_motorcar(equipment.name) and equipment.valid then
       if not global.data[player.index] then
         global.data[player.index] = {}
       end
@@ -56,7 +65,7 @@ local function mount(player)
 
   ---@type LuaEntity
   local motorcar = player.surface.create_entity {
-    name = shared.map[global.data[player.index].equipment.name],
+    name = global.data[player.index].equipment.name,
     position = position,
     force = player.force,
     direction = direction,
@@ -134,7 +143,7 @@ script.on_event(defines.events.on_player_driving_changed_state, function(event)
   -- mounted another entity (e.g. a spidertron standing on top of the rail) -> destroy created motorcar
   -- or not valid anymore - may have been swapped - replace
   elseif data and data.motorcar and (not data.motorcar.valid or not data.motorcar.get_driver()) then
-    if player.driving and player.vehicle.name == shared.map[data.equipment.name] then
+    if player.driving and shared.is_a_motorcar(player.vehicle.name) then
       data.motorcar.destroy()
       data.motorcar = player.vehicle
       data.unmount = nil
@@ -143,7 +152,7 @@ script.on_event(defines.events.on_player_driving_changed_state, function(event)
       global.data[player.index] = nil
     end
   -- mounting an unused motor car -> link it (or destroy it)
-  elseif event.entity and table_contains(shared.map, event.entity.name) then
+  elseif event.entity and shared.is_a_motorcar(event.entity.name) then
     if hasEquipment(player) then
       event.entity.color = player.color
       global.data[player.index].motorcar = event.entity
