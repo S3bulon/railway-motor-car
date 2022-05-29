@@ -50,6 +50,8 @@ function utils.create_entity(prototype_name, name, nuclear)
     motorcar.max_power = "2000kW"
   end
   motorcar.friction_force = 0.1
+  -- decrease braking force to prevent gate crashes
+  motorcar.braking_force = 6
   -- no power source (use equipment)
   motorcar.energy_source = {type = "void"}
 
