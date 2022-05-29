@@ -83,7 +83,13 @@ local function mount(player)
 end
 
 -- check if mounting is allowed (compatibility for other mods)
+--- @param player LuaPlayer
 local function can_mount(player)
+  -- spidertron is standing on top of the rails - enter it instead of the train
+  if table_size(player.surface.find_entities_filtered({type = "spider-vehicle", position = player.position, radius = 3})) > 0 then
+    return false
+  end
+
   -- cannot mount if jetpack is in use
   local jetpacks = remote.interfaces["jetpack"] and remote.call("jetpack", "get_jetpacks", {surface_index=player.surface.index})
   if jetpacks and jetpacks[player.character.unit_number] then
@@ -119,15 +125,6 @@ script.on_event(shared.key, function(event)
     end
   end
 end)
-
-local function table_contains(table, to_find)
-  for _, v in pairs(table) do
-    if v == to_find then
-      return true
-    end
-  end
-  return false
-end
 
 -- event for entering or leaving a vehicle (via base-mod)
 script.on_event(defines.events.on_player_driving_changed_state, function(event)
