@@ -69,3 +69,8 @@ Date: 29.05.2022
   Changes:
     - Decreased braking force to prevent gate crashes on full speed
     - When a spidertron stands on top of the rails, entering is preferred over the motor car.
+---------------------------------------------------------------------------------------------------
+Version: 0.3.4
+Date: 20.06.2022
+  Fixes:
+    - Fixed game crash when pressing <rotate> immediately after the motor car was destroyed

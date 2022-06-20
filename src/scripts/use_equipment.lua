@@ -164,10 +164,12 @@ end)
 -- pressing "rotate" while in motorcar without selection -> rotate motorcar
 script.on_event(shared.rotate, function(event)
   local player = game.get_player(event.player_index)
-  if not player.selected and global.data[player.index] and global.data[player.index].motorcar then
+  if not player.selected then
     ---@type LuaEntity
-    local motorcar = global.data[player.index].motorcar
-    motorcar.rotate()
+    local motorcar = global.data[player.index] and global.data[player.index].motorcar
+    if motorcar and motorcar.valid then
+      motorcar.rotate()
+    end
   end
 end)
 
