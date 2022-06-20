@@ -1,3 +1,5 @@
+local compatibility = require("scripts.compatibility")
+
 local function init()
   global.data = global.data or {}
 end
@@ -144,6 +146,8 @@ script.on_event(defines.events.on_player_driving_changed_state, function(event)
       data.motorcar.destroy()
       data.motorcar = player.vehicle
       data.unmount = nil
+    elseif player.driving and compatibility.ignore_vehicle(player.vehicle.name) then
+      --- may ignore vehicle switch of other mods
     else
       data.motorcar.destroy()
       global.data[player.index] = nil
@@ -180,8 +184,12 @@ script.on_nth_tick(30, function(event)
     -- check only needed if in use
     local invalid = global.data[player.index] and global.data[player.index].motorcar
 
+    -- check compatibility - may ignore temporary vehicles
+    if invalid and player.driving and compatibility.ignore_vehicle(player.vehicle.name) then
+      invalid = false
+
     -- check only if equipped
-    if invalid and
+    elseif invalid and
       player.character and player.driving and
       global.data[player.index].motorcar.valid and
       hasEquipment(player)

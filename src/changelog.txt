@@ -72,5 +72,7 @@ Date: 29.05.2022
 ---------------------------------------------------------------------------------------------------
 Version: 0.3.4
 Date: 20.06.2022
+  Changes:
+    - Added compatibility for RenaiTransportation
   Fixes:
     - Fixed game crash when pressing <rotate> immediately after the motor car was destroyed
