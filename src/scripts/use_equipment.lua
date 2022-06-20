@@ -84,7 +84,7 @@ local function mount(player)
   end
 end
 
--- check if mounting is allowed (compatibility for other mods)
+-- check if mounting is allowed
 --- @param player LuaPlayer
 local function can_mount(player)
   -- spidertron is standing on top of the rails - enter it instead of the train
@@ -92,23 +92,7 @@ local function can_mount(player)
     return false
   end
 
-  -- cannot mount if jetpack is in use
-  local jetpacks = remote.interfaces["jetpack"] and remote.call("jetpack", "get_jetpacks", {surface_index=player.surface.index})
-  if jetpacks and jetpacks[player.character.unit_number] then
-    player.create_local_flying_text({ text = { 'flying-text.'..shared.name..'-jetpack-in-use' }, position = player.position })
-    return false
-  end
-
-  -- train tunnels: cannot mount b/c <enter vehicle> is used for changing surfaces
-  if game.active_mods["traintunnels"] and table_size(player.surface.find_entities_filtered({
-      position = player.position,
-      radius = 10, -- large radius
-      name = { 'traintunnel', 'traintunnelup', 'traintunneldown' }
-    })) > 0 then
-    return false
-  end
-
-  return true
+  return compatibility.can_mount(player)
 end
 
 -- 'enter vehicle'-button
