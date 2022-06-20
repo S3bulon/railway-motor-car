@@ -74,5 +74,6 @@ Version: 0.3.4
 Date: 20.06.2022
   Changes:
     - Added compatibility for RenaiTransportation
+    - Ignored "Super locomotive" from Editor Extension for dynamic motor cars (created by 0.3.0)
   Fixes:
     - Fixed game crash when pressing <rotate> immediately after the motor car was destroyed
