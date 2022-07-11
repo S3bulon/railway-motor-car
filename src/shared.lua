@@ -12,6 +12,8 @@ data.nuclear_motorcar = data.motorcar_prefix ..'nuclear'
 data.key = data.name..'-key'
 data.rotate = data.name..'-rotate'
 
+data.keep_schedule = data.name..'-keep-schedule'
+
 data.root = '__railway-motor-car__'
 
 function data.is_a_motorcar(name)

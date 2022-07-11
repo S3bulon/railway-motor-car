@@ -2,6 +2,7 @@ local compatibility = require("scripts.compatibility")
 
 local function init()
   global.data = global.data or {}
+  global.schedules = global.schedules or {}
 end
 
 local function config_changed()
@@ -79,6 +80,11 @@ local function mount(player)
     player.teleport(player.surface.find_non_colliding_position('character', motorcar.position, 10, 0.1))
 
     global.data[player.index].motorcar = motorcar
+
+    -- load schedule, if needed
+    if player.mod_settings[shared.keep_schedule].value and global.schedules[player.index] then
+      motorcar.train.schedule = global.schedules[player.index]
+    end
   else
     player.teleport(position)
   end
@@ -118,6 +124,11 @@ script.on_event(defines.events.on_player_driving_changed_state, function(event)
   local data = global.data[player.index]
   -- remove motorcar if unmounting was requested (and the player is not driving anymore)
   if data and data.unmount and data.motorcar and not player.driving then
+    -- store schedule, if needed
+    if player.mod_settings[shared.keep_schedule].value then
+      global.schedules[player.index] = data.motorcar.train.schedule
+    end
+
     data.motorcar.destroy()
     -- move character to exact place as before
     player.character.teleport(data.unmount)
