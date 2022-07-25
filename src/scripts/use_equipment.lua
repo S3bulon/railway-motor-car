@@ -46,7 +46,7 @@ local function at_rail(player)
   local res = player.surface.find_entities_filtered({
     position = player.position,
     radius = 3,
-    type = { 'straight-rail', 'curved-rail' }
+    type = { "straight-rail", "curved-rail" }
   })
   return table_size(res) > 0
 end
@@ -80,7 +80,7 @@ local function mount(player)
   local position = player.position
   local direction = player.character.direction
   -- teleport character to any position to make space for creating the entity
-  player.teleport(player.surface.find_non_colliding_position('character', position, 100, 10))
+  player.teleport(player.surface.find_non_colliding_position("character", position, 100, 10))
 
   ---@type LuaEntity
   local motorcar = player.surface.create_entity {
@@ -93,7 +93,7 @@ local function mount(player)
   if motorcar then
     motorcar.color = player.color
     -- teleport close to position of the motorcar to allow entering (done in base mod)
-    player.teleport(player.surface.find_non_colliding_position('character', motorcar.position, 10, 0.1))
+    player.teleport(player.surface.find_non_colliding_position("character", motorcar.position, 10, 0.1))
 
     global.data[player.index].motorcar = motorcar
 
@@ -117,7 +117,7 @@ local function can_mount(player)
   return compatibility.can_mount(player)
 end
 
--- 'enter vehicle'-button
+-- "enter vehicle"-button
 script.on_event(shared.key, function(event)
   local player = game.get_player(event.player_index)
   if player.character then
@@ -171,7 +171,7 @@ script.on_event(defines.events.on_player_driving_changed_state, function(event)
     else
       player.driving = false
       event.entity.destroy()
-      player.create_local_flying_text({ text = { 'flying-text.'..shared.name..'-missing-equipment' }, position = player.position })
+      player.create_local_flying_text({ text = { "flying-text."..shared.name.."-missing-equipment" }, position = player.position })
     end
   end
 end)
@@ -218,9 +218,9 @@ script.on_nth_tick(30, function(event)
       -- player is still active and driving -> unmount
       if player.character and player.driving then
         if global.data[player.index].equipment and global.data[player.index].equipment.valid and global.data[player.index].equipment.energy == 0 then
-          player.create_local_flying_text({ text = { 'flying-text.'..shared.name..'-no-power' }, position = player.position })
+          player.create_local_flying_text({ text = { "flying-text."..shared.name.."-no-power" }, position = player.position })
         else
-          player.create_local_flying_text({ text = { 'flying-text.'..shared.name..'-missing-equipment' }, position = player.position })
+          player.create_local_flying_text({ text = { "flying-text."..shared.name.."-missing-equipment" }, position = player.position })
         end
         unmount(player)
         player.driving = false
@@ -230,7 +230,7 @@ script.on_nth_tick(30, function(event)
       else
         -- otherwise: remove locomotive and clear data (if the player is still active and not driving, he could not enter -> show hint)
         if player.character then
-          player.create_local_flying_text({ text = { 'flying-text.'..shared.name..'-could-not-enter' }, position = global.data[player.index].motorcar.position })
+          player.create_local_flying_text({ text = { "flying-text."..shared.name.."-could-not-enter" }, position = global.data[player.index].motorcar.position })
         end
         global.data[player.index].motorcar.destroy()
         global.data[player.index] = nil
