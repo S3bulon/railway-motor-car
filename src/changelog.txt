@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.3.7
+Date: 25.07.2022
+  Fixes:
+    - Fixed a crash when the surface is switched and the stored schedule contains a temporary stop
+---------------------------------------------------------------------------------------------------
 Version: 0.3.6
 Date: 15.07.2022
   Fixes:
