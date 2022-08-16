@@ -13,9 +13,9 @@ end
 --- @param player LuaPlayer
 function compatibility.can_mount(player)
 
-  -- jetpack: cannot mount if jetpack is in use
+  -- jetpack: cannot mount if jetpack is in use (only actual flying)
   local jetpacks = remote.interfaces["jetpack"] and remote.call("jetpack", "get_jetpacks", {surface_index=player.surface.index})
-  if jetpacks and jetpacks[player.character.unit_number] then
+  if jetpacks and jetpacks[player.character.unit_number] and jetpacks[player.character.unit_number].status == "flying" then
     player.create_local_flying_text({ text = { "flying-text."..shared.name.."-jetpack-in-use" }, position = player.position })
     return false
   end
