@@ -97,6 +97,7 @@ local function mount(player)
     player.teleport(player.surface.find_non_colliding_position("character", motorcar.position, 10, 0.1))
 
     global.data[player.index].motorcar = motorcar
+    global.data[player.index].mount = true
 
     -- load schedule, if needed
     if player.mod_settings[shared.keep_schedule].value and global.schedules[player.index] then
@@ -139,37 +140,53 @@ end)
 script.on_event(defines.events.on_player_driving_changed_state, function(event)
   local player = game.get_player(event.player_index)
   local data = global.data[player.index]
-  -- remove motorcar if unmounting was requested (and the player is not driving anymore)
-  if data and data.unmount and data.motorcar and not player.driving then
-    -- store schedule, if needed
-    if player.mod_settings[shared.keep_schedule].value then
-      global.schedules[player.index] = data.motorcar.train.schedule
+
+  -- manual unmounting: remove motorcar
+  if data and data.unmount then
+    -- only if the player is not driving anymore
+    if data.motorcar and not player.driving then
+      -- store schedule, if needed
+      if player.mod_settings[shared.keep_schedule].value then
+        global.schedules[player.index] = data.motorcar.train.schedule
+      end
+
+      data.motorcar.destroy()
+      -- move character to exact place as before
+      player.character.teleport(data.unmount)
+      global.data[player.index] = nil
+    else
+      -- otherwise: invalid -> reset
+      data.unmount = nil
     end
 
-    data.motorcar.destroy()
-    -- move character to exact place as before
-    player.character.teleport(data.unmount)
-    global.data[player.index] = nil
-
-  -- mounted another entity (e.g. a spidertron standing on top of the rail) -> destroy created motorcar
-  -- or not valid anymore - may have been swapped - replace
-  elseif data and data.motorcar and (not data.motorcar.valid or not data.motorcar.get_driver()) then
-    if player.driving and shared.is_a_motorcar(player.vehicle.name) then
-      data.motorcar.destroy()
-      data.motorcar = player.vehicle
-      data.unmount = nil
-    elseif player.driving and compatibility.ignore_vehicle(player.vehicle.name) then
-      --- may ignore vehicle switch of other mods
-    else
+  -- manual mounting: check motorcar
+  elseif data and data.mount then
+    -- mounted another entity (e.g. a spidertron standing on top of the rail) -> destroy created motorcar
+    if not player.driving or not shared.is_a_motorcar(player.vehicle.name) then
       data.motorcar.destroy()
       global.data[player.index] = nil
     end
-  -- mounting an unused motor car -> link it (or destroy it)
+
+    data.mount = nil -- check done
+
+  -- driving state changed by other mods: is not valid or has no driver
+  elseif data and data.motorcar and (not data.motorcar.valid or not data.motorcar.get_driver()) then
+    -- may have been swapped - replace
+    if player.driving and shared.is_a_motorcar(player.vehicle.name) then
+      data.motorcar = player.vehicle
+    else
+      -- any other change: cleanup (other mods should clean their entities themselves)
+      global.data[player.index] = nil
+    end
+
+  -- mounting an unused motor car (possibly copied by other mods) -> link it
   elseif event.entity and shared.is_a_motorcar(event.entity.name) then
     if hasEquipment(player) then
       event.entity.color = player.color
       global.data[player.index].motorcar = event.entity
     else
+      -- cannot mount it -> destroy it
+      -- possible issue: equipment removed while copying (e.g. jumping in renai transportation) may cause an error. but it is unlikely
       player.driving = false
       event.entity.destroy()
       player.create_local_flying_text({ text = { "flying-text."..shared.name.."-missing-equipment" }, position = player.position })
@@ -196,12 +213,8 @@ script.on_nth_tick(30, function(event)
     -- check only needed if in use
     local invalid = global.data[player.index] and global.data[player.index].motorcar
 
-    -- check compatibility - may ignore temporary vehicles
-    if invalid and player.driving and compatibility.ignore_vehicle(player.vehicle.name) then
-      invalid = false
-
     -- check only if equipped
-    elseif invalid and
+    if invalid and
       player.character and player.driving and
       global.data[player.index].motorcar.valid and
       hasEquipment(player)

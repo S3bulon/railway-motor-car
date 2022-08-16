@@ -1,6 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.3.8
 Date: 16.08.2022
+  Changed:
+    - Reworked handling of the driver-state to prevent crashes from other mods (e.g. Space Exploration)
   Compatibility:
     - Updated Jetpack-Check (0.1.5) to only "flying", not "hovering in space"
 ---------------------------------------------------------------------------------------------------
