@@ -23,4 +23,15 @@ function compatibility.can_mount(player)
   return true
 end
 
+-- ignore tick-check (which removes unused motor cars)
+--- @param player LuaPlayer
+function compatibility.ignore_tick(player)
+  -- SE: nav-view removes the character - do not remove the motorcar
+  if remote.interfaces["space-exploration"] and remote.call("space-exploration", "remote_view_is_active", {player=player}) then
+    return true
+  end
+
+  return false
+end
+
 return compatibility

@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.3.9
+Date: 27.09.2022
+  Compatibility:
+    - Do not remove the motor car if the Nav / Remote View from Space Exploration is in use
+---------------------------------------------------------------------------------------------------
 Version: 0.3.8
 Date: 16.08.2022
   Changed:

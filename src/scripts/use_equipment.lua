@@ -213,6 +213,9 @@ script.on_nth_tick(30, function(event)
     -- check only needed if in use
     local invalid = global.data[player.index] and global.data[player.index].motorcar
 
+    -- may ignore check for compatibility
+    invalid = invalid and not compatibility.ignore_tick(player)
+
     -- check only if equipped
     if invalid and
       player.character and player.driving and
