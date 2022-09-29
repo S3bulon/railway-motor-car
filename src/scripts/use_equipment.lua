@@ -81,7 +81,12 @@ local function mount(player)
   local position = player.position
   local direction = player.character.direction
   -- teleport character to any position to make space for creating the entity
-  player.teleport(player.surface.find_non_colliding_position("character", position, 100, 10))
+  local pos = player.surface.find_non_colliding_position("character", position, 100, 10)
+  if not pos then
+    player.create_local_flying_text({ text = { "flying-text."..shared.name.."-can-not-spawn" }, position = player.position })
+    return
+  end
+  player.teleport(pos)
 
   ---@type LuaEntity
   local motorcar = player.surface.create_entity {
@@ -92,9 +97,17 @@ local function mount(player)
   }
 
   if motorcar then
+    -- teleport close to position of the motorcar to allow entering (done in the base mod)
+    pos = player.surface.find_non_colliding_position("character", motorcar.position, 10, 0.1)
+    if not pos then
+      motorcar.destroy()
+      player.teleport(position)
+      player.create_local_flying_text({ text = { "flying-text."..shared.name.."-can-not-spawn" }, position = player.position })
+      return
+    end
+    player.teleport(pos)
+
     motorcar.color = player.color
-    -- teleport close to position of the motorcar to allow entering (done in base mod)
-    player.teleport(player.surface.find_non_colliding_position("character", motorcar.position, 10, 0.1))
 
     global.data[player.index].motorcar = motorcar
     global.data[player.index].mount = true

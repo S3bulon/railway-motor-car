@@ -1,6 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.3.9
-Date: 27.09.2022
+Date: 29.09.2022
+  Fixes:
+    - Show hint instead of crash if the motor car cannot be spawned
   Compatibility:
     - Do not remove the motor car if the Nav / Remote View from Space Exploration is in use
 ---------------------------------------------------------------------------------------------------
