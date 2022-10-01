@@ -13,6 +13,7 @@ data.key = data.name.."-key"
 data.rotate = data.name.."-rotate"
 
 data.keep_schedule = data.name.."-keep-schedule"
+data.keep_temporary = data.name.."-keep-temporary"
 
 data.root = "__railway-motor-car__"
 

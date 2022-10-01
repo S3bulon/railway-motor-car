@@ -61,13 +61,13 @@ end
 --- cleanup the given schedule by removing invalid entities (or from other surfaces)
 ---@param entity LuaEntity
 ---@param schedule TrainSchedule
-local function cleanup_schedule(entity, schedule)
+local function cleanup_schedule(entity, schedule, keep_temporary)
   if not schedule then
     return nil
   end
 
   for i, record in pairs(schedule.records) do
-    if record.rail and not (record.rail.valid and record.rail.surface == entity.surface) then
+    if record.rail and not (record.rail.valid and record.rail.surface == entity.surface) or (record.temporary and not keep_temporary) then
       table.remove(schedule.records, i)
     end
   end
@@ -114,7 +114,7 @@ local function mount(player)
 
     -- load schedule, if needed
     if player.mod_settings[shared.keep_schedule].value and global.schedules[player.index] then
-      motorcar.train.schedule = cleanup_schedule(motorcar, global.schedules[player.index])
+      motorcar.train.schedule = cleanup_schedule(motorcar, global.schedules[player.index], player.mod_settings[shared.keep_temporary].value)
     end
   else
     player.teleport(position)
