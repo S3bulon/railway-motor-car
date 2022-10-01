@@ -90,12 +90,22 @@ local rotate = {
   key_sequence = ""
 }
 
+---@type Prototype_CustomInput
+local home = {
+  type = "custom-input",
+  name = shared.home,
+  localised_name = "Go Home",
+  localised_description = "Send the train to the Home station configured in player mod settings.",
+  -- linked_game_control = "",
+  key_sequence = "H"
+}
+
 data:extend {
   base_equipment, nuclear_equipment,
   base_item, nuclear_item,
   base_recipe, nuclear_recipe,
   base_technology, nuclear_technology,
-  key, rotate
+  key, rotate, home
 }
 
 if not mods["informatron"] then

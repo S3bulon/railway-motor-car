@@ -219,6 +219,54 @@ script.on_event(shared.rotate, function(event)
   end
 end)
 
+-- pressing "H" while in motorcar will send the motorcar to the players "Home" station
+script.on_event(shared.home, function(event)
+  local player = game.get_player(event.player_index)
+  ---@type LuaEntity
+  local motorcar = global.data[player.index] and global.data[player.index].motorcar
+
+  if motorcar and motorcar.valid then
+    local home_config = player.mod_settings[shared.home].value
+    local home_station = nil
+    local had_matches = false
+
+    -- Try to find the home station for the players surface
+    for surface, station in string.gmatch(home_config, "(%w+)=([^,]+)") do
+      had_matches = true -- if we iterated at least once, then we had a fancy config.
+      if string.lower(surface) == player.surface.name then
+        home_station = station
+        break
+      end
+    end
+
+    -- If we never iterated over the config, we expect it to be a station name
+    if not had_matches then
+      home_station = home_config
+    end
+
+    -- Give up with a warning if no home station was found
+    if not home_station or home_station == '' then
+      if not had_matches then
+        player.create_local_flying_text({ text = { "flying-text."..shared.name.."-no-home" }, position = player.position })
+      else
+        player.create_local_flying_text({ text = { "flying-text." .. shared.name .. "-no-home-surface",
+          player.surface.name:gsub("^%l", string.upper) }, position = player.position })
+
+      end
+      return
+    end
+
+    -- Replace train schedule with the found home station and switch the train to automatic to get going!
+    player.create_local_flying_text({ text = { "flying-text."..shared.name.."-going-home", home_station }, position = player.position })
+    motorcar.train.schedule = {
+      current = 1,
+      records = {{
+      station = home_station
+    }}}
+    motorcar.train.manual_mode = false
+  end
+end)
+
 -- checking if equipment is still valid and has enough power
 script.on_nth_tick(30, function(event)
   ---@param player LuaPlayer
