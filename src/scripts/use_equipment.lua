@@ -3,6 +3,7 @@ local compatibility = require("scripts.compatibility")
 local function init()
   global.data = global.data or {}
   global.schedules = global.schedules or {}
+  global.return_schedule = global.return_schedule or {}
 end
 
 local function config_changed()
@@ -141,14 +142,14 @@ local function save_return(player)
 
     local rails = player.surface.find_entities_filtered({
       position = motorcar.position,
-      radius = 1,
+      radius = 3,
       type = { "straight-rail", "curved-rail" }
     })
 
-    if rails then
-      local return_rail = rails[1]
+    local return_rail = rails[1]
 
-      global.data[player.index].motorcar_return_schedule = {
+    if return_rail then
+      global.return_schedule[player.index] = {
         current = 1,
         records = {
           {
@@ -157,6 +158,8 @@ local function save_return(player)
           }
         }
       }
+    else
+      game.print("Err: Found no rail to return to.")
     end
   end
 end
@@ -307,20 +310,21 @@ script.on_event(shared.home_return, function(event)
   local player = game.get_player(event.player_index)
   ---@type LuaEntity
   local motorcar = global.data[player.index] and global.data[player.index].motorcar
-  local return_schedule = global.data[player.index] and global.data[player.index].motorcar_return_schedule
+  local return_schedule = global.return_schedule[player.index]
 
   if motorcar and motorcar.valid then
-    if return_schedule then
-      local return_rail = return_schedule.records[1].rail
-      -- Replace train schedule with the found home station and switch the train to automatic to get going!
-      player.create_local_flying_text({ text = { "flying-text." .. shared.name .. "-returning", return_rail.position },
-        position = player.position })
+    local return_rail = return_schedule and return_schedule.records[1].rail
+    if return_rail and return_rail.valid then
+      -- Replace train schedule with the stored return_schedule and switch the train to automatic to get going!
+      player.create_local_flying_text({
+        text = { "flying-text." .. shared.name .. "-returning", return_rail.position },
+        position = player.position
+      })
       motorcar.train.schedule = return_schedule
       motorcar.train.manual_mode = false
-
     else
-      player.create_local_flying_text({ color = { 0.5, 0, 0, 0.5 },
-        text = { "flying-text." .. shared.name .. "-going-no-return" }, position = player.position })
+      player.create_local_flying_text({ color = { 1, 1, 0 },
+        text = { "flying-text." .. shared.name .. "-no-return" }, position = player.position })
     end
   end
 end)
