@@ -132,6 +132,35 @@ local function can_mount(player)
   return compatibility.can_mount(player)
 end
 
+--- Save return path when travelling home
+---@param player LuaPlayer
+local function save_return(player)
+  local motorcar = global.data[player.index] and global.data[player.index].motorcar
+
+  if motorcar and motorcar.valid then
+
+    local rails = player.surface.find_entities_filtered({
+      position = motorcar.position,
+      radius = 1,
+      type = { "straight-rail", "curved-rail" }
+    })
+
+    if rails then
+      local return_rail = rails[1]
+
+      global.data[player.index].motorcar_return_schedule = {
+        current = 1,
+        records = {
+          {
+            rail = return_rail,
+            temporary = true
+          }
+        }
+      }
+    end
+  end
+end
+
 -- "enter vehicle"-button
 script.on_event(shared.key, function(event)
   local player = game.get_player(event.player_index)
@@ -230,6 +259,8 @@ script.on_event(shared.home, function(event)
     local home_station = nil
     local had_matches = false
 
+    save_return(player)
+
     -- Try to find the home station for the players surface
     for surface, station in string.gmatch(home_config, "(%w+)=([^,]+)") do
       had_matches = true -- if we iterated at least once, then we had a fancy config.
@@ -260,10 +291,37 @@ script.on_event(shared.home, function(event)
     player.create_local_flying_text({ text = { "flying-text."..shared.name.."-going-home", home_station }, position = player.position })
     motorcar.train.schedule = {
       current = 1,
-      records = {{
-      station = home_station
-    }}}
+      records = {
+        {
+          station = home_station,
+          temporary = true
+        }
+      }
+    }
     motorcar.train.manual_mode = false
+  end
+end)
+
+-- pressing "shift+H" while in motorcar will send the motorcar back to there the player went home from
+script.on_event(shared.home_return, function(event)
+  local player = game.get_player(event.player_index)
+  ---@type LuaEntity
+  local motorcar = global.data[player.index] and global.data[player.index].motorcar
+  local return_schedule = global.data[player.index] and global.data[player.index].motorcar_return_schedule
+
+  if motorcar and motorcar.valid then
+    if return_schedule then
+      local return_rail = return_schedule.records[1].rail
+      -- Replace train schedule with the found home station and switch the train to automatic to get going!
+      player.create_local_flying_text({ text = { "flying-text." .. shared.name .. "-returning", return_rail.position },
+        position = player.position })
+      motorcar.train.schedule = return_schedule
+      motorcar.train.manual_mode = false
+
+    else
+      player.create_local_flying_text({ color = { 0.5, 0, 0, 0.5 },
+        text = { "flying-text." .. shared.name .. "-going-no-return" }, position = player.position })
+    end
   end
 end)
 

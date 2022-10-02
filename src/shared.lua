@@ -12,6 +12,7 @@ data.nuclear_motorcar = data.motorcar_prefix .."nuclear"
 data.key = data.name.."-key"
 data.rotate = data.name.."-rotate"
 data.home = data.name.."-home"
+data.home_return = data.name.."-home-return"
 
 data.keep_schedule = data.name.."-keep-schedule"
 data.keep_temporary = data.name.."-keep-temporary"
