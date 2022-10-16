@@ -12,6 +12,8 @@ function Informatron.page_content(page_name, player_index, element)
   local player = game.players[player_index]
   if page_name == "railway-motor-car" then
     element.add{type="label", name="text_1", caption={"railway-motor-car.page_railway-motor-car_text_1"}}
+    element.add{type="label", name="sep", caption="\n\n"}
+    element.add{type="label", name="text_2", caption={"railway-motor-car.page_railway-motor-car_text_2"}}
   end
 end
 

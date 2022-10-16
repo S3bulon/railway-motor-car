@@ -1,3 +1,4 @@
+local utils = require("global-utils")
 local compatibility = require("scripts.compatibility")
 
 local function init()
@@ -158,8 +159,6 @@ local function save_return(player)
           }
         }
       }
-    else
-      game.print("Err: Found no rail to return to.")
     end
   end
 end
@@ -262,12 +261,10 @@ script.on_event(shared.home, function(event)
     local home_station = nil
     local had_matches = false
 
-    save_return(player)
-
-    -- Try to find the home station for the players surface
-    for surface, station in string.gmatch(home_config, "(%w+)=([^,]+)") do
+    -- Try to find the home station for the players surface (do not use "=" b/c icons are saved like this: "[item=iron-plate] Smelting")
+    for surface, station in string.gmatch(home_config, "(%w+):([^,]+)") do
       had_matches = true -- if we iterated at least once, then we had a fancy config.
-      if string.lower(surface) == player.surface.name then
+      if string.lower(surface) == string.lower(player.surface.name) then
         home_station = station
         break
       end
@@ -283,12 +280,36 @@ script.on_event(shared.home, function(event)
       if not had_matches then
         player.create_local_flying_text({ text = { "flying-text."..shared.name.."-no-home" }, position = player.position })
       else
-        player.create_local_flying_text({ text = { "flying-text." .. shared.name .. "-no-home-surface",
-          player.surface.name:gsub("^%l", string.upper) }, position = player.position })
-
+        player.create_local_flying_text({
+          text = { "flying-text." .. shared.name .. "-no-home-surface", player.surface.name:gsub("^%l", string.upper) },
+          position = player.position
+        })
       end
       return
     end
+
+    -- check existing home station
+    local home = player.surface.get_train_stops({
+      name = home_station,
+      force = player.force
+    })[1]
+
+    if not home then
+      player.create_local_flying_text({ text = { "flying-text."..shared.name.."-no-home-found", home_station }, position = player.position })
+      return
+    end
+
+    -- already at home: do not return (and do not overwrite return position)
+    if utils.table_contains(player.surface.find_entities_filtered({
+      position = motorcar.position,
+      radius = 10,
+      name = home.name
+    }), home) then
+      player.create_local_flying_text({ text = { "flying-text."..shared.name.."-already-at-home", home_station }, position = player.position })
+      return
+    end
+
+    save_return(player)
 
     -- Replace train schedule with the found home station and switch the train to automatic to get going!
     player.create_local_flying_text({ text = { "flying-text."..shared.name.."-going-home", home_station }, position = player.position })
@@ -305,7 +326,7 @@ script.on_event(shared.home, function(event)
   end
 end)
 
--- pressing "shift+H" while in motorcar will send the motorcar back to there the player went home from
+-- pressing "shift+H" while in motorcar will send the motorcar back to where the player went home from
 script.on_event(shared.home_return, function(event)
   local player = game.get_player(event.player_index)
   ---@type LuaEntity
@@ -314,10 +335,10 @@ script.on_event(shared.home_return, function(event)
 
   if motorcar and motorcar.valid then
     local return_rail = return_schedule and return_schedule.records[1].rail
-    if return_rail and return_rail.valid then
+    if return_rail and return_rail.valid and return_rail.surface == player.surface then
       -- Replace train schedule with the stored return_schedule and switch the train to automatic to get going!
       player.create_local_flying_text({
-        text = { "flying-text." .. shared.name .. "-returning", return_rail.position },
+        text = { "flying-text." .. shared.name .. "-returning" },
         position = player.position
       })
       motorcar.train.schedule = return_schedule
@@ -326,6 +347,8 @@ script.on_event(shared.home_return, function(event)
       player.create_local_flying_text({ color = { 1, 1, 0 },
         text = { "flying-text." .. shared.name .. "-no-return" }, position = player.position })
     end
+
+    global.return_schedule[player.index] = nil
   end
 end)
 
