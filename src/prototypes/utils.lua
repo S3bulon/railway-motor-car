@@ -1,4 +1,4 @@
-local utils = {}
+local utils = require("global-utils")
 
 function utils.scale(layer, shiftX, shiftY)
   if not layer then

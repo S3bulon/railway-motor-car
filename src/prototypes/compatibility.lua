@@ -1,18 +1,9 @@
-local utils = require "utils"
-
-local function table_contains(table, value)
-  for _, v in pairs(table) do
-    if v == value then
-      return true
-    end
-  end
-  return false
-end
+local utils = require("prototypes.utils")
 
 -- check for modded locomotives and create equipment & entity for them
 for prototype_name, prototype in pairs(data.raw["locomotive"]) do
   if prototype_name ~= "locomotive" and not shared.is_a_motorcar(prototype_name)
-    and not table_contains(railway_motorcar_ignored, prototype_name)
+    and not utils.table_contains(railway_motorcar_ignored, prototype_name)
   then
     -- use item with the same name
     local prototype_item = data.raw["item-with-entity-data"][prototype_name]
