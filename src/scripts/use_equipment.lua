@@ -3,6 +3,7 @@ local compatibility = require("scripts.compatibility")
 local function init()
   global.data = global.data or {}
   global.schedules = global.schedules or {}
+  global.return_schedule = global.return_schedule or {}
 end
 
 local function config_changed()
@@ -61,13 +62,13 @@ end
 --- cleanup the given schedule by removing invalid entities (or from other surfaces)
 ---@param entity LuaEntity
 ---@param schedule TrainSchedule
-local function cleanup_schedule(entity, schedule)
+local function cleanup_schedule(entity, schedule, keep_temporary)
   if not schedule then
     return nil
   end
 
   for i, record in pairs(schedule.records) do
-    if record.rail and not (record.rail.valid and record.rail.surface == entity.surface) then
+    if record.rail and not (record.rail.valid and record.rail.surface == entity.surface) or (record.temporary and not keep_temporary) then
       table.remove(schedule.records, i)
     end
   end
@@ -114,7 +115,7 @@ local function mount(player)
 
     -- load schedule, if needed
     if player.mod_settings[shared.keep_schedule].value and global.schedules[player.index] then
-      motorcar.train.schedule = cleanup_schedule(motorcar, global.schedules[player.index])
+      motorcar.train.schedule = cleanup_schedule(motorcar, global.schedules[player.index], player.mod_settings[shared.keep_temporary].value)
     end
   else
     player.teleport(position)
@@ -130,6 +131,37 @@ local function can_mount(player)
   end
 
   return compatibility.can_mount(player)
+end
+
+--- Save return path when travelling home
+---@param player LuaPlayer
+local function save_return(player)
+  local motorcar = global.data[player.index] and global.data[player.index].motorcar
+
+  if motorcar and motorcar.valid then
+
+    local rails = player.surface.find_entities_filtered({
+      position = motorcar.position,
+      radius = 3,
+      type = { "straight-rail", "curved-rail" }
+    })
+
+    local return_rail = rails[1]
+
+    if return_rail then
+      global.return_schedule[player.index] = {
+        current = 1,
+        records = {
+          {
+            rail = return_rail,
+            temporary = true
+          }
+        }
+      }
+    else
+      game.print("Err: Found no rail to return to.")
+    end
+  end
 end
 
 -- "enter vehicle"-button
@@ -215,6 +247,84 @@ script.on_event(shared.rotate, function(event)
     local motorcar = global.data[player.index] and global.data[player.index].motorcar
     if motorcar and motorcar.valid then
       motorcar.rotate()
+    end
+  end
+end)
+
+-- pressing "H" while in motorcar will send the motorcar to the players "Home" station
+script.on_event(shared.home, function(event)
+  local player = game.get_player(event.player_index)
+  ---@type LuaEntity
+  local motorcar = global.data[player.index] and global.data[player.index].motorcar
+
+  if motorcar and motorcar.valid then
+    local home_config = player.mod_settings[shared.home].value
+    local home_station = nil
+    local had_matches = false
+
+    save_return(player)
+
+    -- Try to find the home station for the players surface
+    for surface, station in string.gmatch(home_config, "(%w+)=([^,]+)") do
+      had_matches = true -- if we iterated at least once, then we had a fancy config.
+      if string.lower(surface) == player.surface.name then
+        home_station = station
+        break
+      end
+    end
+
+    -- If we never iterated over the config, we expect it to be a station name
+    if not had_matches then
+      home_station = home_config
+    end
+
+    -- Give up with a warning if no home station was found
+    if not home_station or home_station == '' then
+      if not had_matches then
+        player.create_local_flying_text({ text = { "flying-text."..shared.name.."-no-home" }, position = player.position })
+      else
+        player.create_local_flying_text({ text = { "flying-text." .. shared.name .. "-no-home-surface",
+          player.surface.name:gsub("^%l", string.upper) }, position = player.position })
+
+      end
+      return
+    end
+
+    -- Replace train schedule with the found home station and switch the train to automatic to get going!
+    player.create_local_flying_text({ text = { "flying-text."..shared.name.."-going-home", home_station }, position = player.position })
+    motorcar.train.schedule = {
+      current = 1,
+      records = {
+        {
+          station = home_station,
+          temporary = true
+        }
+      }
+    }
+    motorcar.train.manual_mode = false
+  end
+end)
+
+-- pressing "shift+H" while in motorcar will send the motorcar back to there the player went home from
+script.on_event(shared.home_return, function(event)
+  local player = game.get_player(event.player_index)
+  ---@type LuaEntity
+  local motorcar = global.data[player.index] and global.data[player.index].motorcar
+  local return_schedule = global.return_schedule[player.index]
+
+  if motorcar and motorcar.valid then
+    local return_rail = return_schedule and return_schedule.records[1].rail
+    if return_rail and return_rail.valid then
+      -- Replace train schedule with the stored return_schedule and switch the train to automatic to get going!
+      player.create_local_flying_text({
+        text = { "flying-text." .. shared.name .. "-returning", return_rail.position },
+        position = player.position
+      })
+      motorcar.train.schedule = return_schedule
+      motorcar.train.manual_mode = false
+    else
+      player.create_local_flying_text({ color = { 1, 1, 0 },
+        text = { "flying-text." .. shared.name .. "-no-return" }, position = player.position })
     end
   end
 end)

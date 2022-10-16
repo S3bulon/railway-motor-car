@@ -63,8 +63,13 @@ function utils.create_entity(prototype_name, name, nuclear)
   motorcar.joint_distance = 2
   motorcar.vertical_selection_shift = -0.25
 
-  for _, layer in pairs(motorcar.pictures.layers or {}) do
-    utils.scale(layer, 0, 0.2)
+  -- Some entities might not have multiple layers
+  if motorcar["pictures"]["layers"] then
+    for _, layer in pairs(motorcar.pictures.layers or {}) do
+      utils.scale(layer, 0, 0.2)
+    end
+  else
+    utils.scale(motorcar.pictures)
   end
 
   utils.scale(motorcar.wheels, 0, 0.35)
