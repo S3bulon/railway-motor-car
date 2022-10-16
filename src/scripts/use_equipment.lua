@@ -190,7 +190,7 @@ script.on_event(defines.events.on_player_driving_changed_state, function(event)
     -- only if the player is not driving anymore
     if data.motorcar and not player.driving then
       -- store schedule, if needed
-      if player.mod_settings[shared.keep_schedule].value then
+      if player.mod_settings[shared.keep_schedule].value and not data.do_not_store_schedule then
         global.schedules[player.index] = data.motorcar.train.schedule
       end
 
@@ -323,6 +323,9 @@ script.on_event(shared.home, function(event)
       }
     }
     motorcar.train.manual_mode = false
+
+    -- do not overwrite stored schedule!
+    global.data[player.index].do_not_store_schedule = true
   end
 end)
 
@@ -343,6 +346,9 @@ script.on_event(shared.home_return, function(event)
       })
       motorcar.train.schedule = return_schedule
       motorcar.train.manual_mode = false
+
+      -- do not overwrite stored schedule!
+      global.data[player.index].do_not_store_schedule = true
     else
       player.create_local_flying_text({ color = { 1, 1, 0 },
         text = { "flying-text." .. shared.name .. "-no-return" }, position = player.position })
