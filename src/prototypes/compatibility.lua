@@ -1,4 +1,5 @@
 local utils = require("prototypes.utils")
+local flib = mods["flib"] and require( "__flib__.data-util")
 
 -- check for modded locomotives and create equipment & entity for them
 for prototype_name, prototype in pairs(data.raw["locomotive"]) do
@@ -17,13 +18,19 @@ for prototype_name, prototype in pairs(data.raw["locomotive"]) do
       end
     end
 
-    -- cannot create the recipe without the item
-    if prototype_item then
+    -- cannot create the recipe without the item (it must be visible to craft it)
+    if prototype_item and not (prototype_item.flags and utils.table_contains(prototype_item.flags, "hidden")) then
       log("Creating motorcar for " .. prototype_name)
 
       local name = shared.motorcar_prefix .. prototype_name
       local motorcar = utils.create_entity(prototype_name, name, true)
-      motorcar.localised_name = {"", {"entity-name." .. shared.base_motorcar}, " (", {"entity-name." .. prototype_name}, ")"}
+
+      -- other mods may not use translations, but set the localized name instead
+      local localised_name = {"", {"entity-name." .. shared.base_motorcar}, " ("};
+      table.insert(localised_name, prototype_item.localised_name or {"entity-name." .. prototype_name})
+      table.insert(localised_name, ")")
+      motorcar.localised_name = localised_name
+
       data:extend {motorcar}
 
       local equipment = utils.create_equipment(name, true)
@@ -32,10 +39,25 @@ for prototype_name, prototype in pairs(data.raw["locomotive"]) do
       local item = utils.create_item(name)
       item.localised_name = motorcar.localised_name
       item.localised_description = {"item-description." .. shared.base_motorcar}
-      -- copy icon of the original b/c they are dynamic
-      item.icon = prototype_item.icon
-      item.icon_size = prototype_item.icon_size
-      item.icons = prototype_item.icons
+
+      if flib then
+        -- with flib: Generate icons with overlay
+        local motorcar_icon = {
+          {
+            icon = shared.root .. "/graphics/equipment/motorcar_overlay.png",
+            icon_size = 64,
+            tint = {r=1, g=1, b=1, a=1}
+          }
+        }
+        item.icons = flib.create_icons(prototype, motorcar_icon) or motorcar_icon
+        item.icon = nil
+        item.icon_size = nil
+      else
+        -- fallback: copy icon of the original b/c they are dynamic
+        item.icon = prototype_item.icon
+        item.icon_size = prototype_item.icon_size
+        item.icons = prototype_item.icons
+      end
 
       local recipe = {
         type = "recipe",
