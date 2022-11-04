@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.0
-Date: 24.10.2022
+Date: 04.11.2022
   Features:
     - Added option to remove temporary stops when keeping the train schedule.
     - Added Home station. Each player can set their Home station in the player mod settings, when pressing 'H' the motorcar will automatically travel to your Home station.

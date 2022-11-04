@@ -94,9 +94,6 @@ local rotate = {
 local home = {
   type = "custom-input",
   name = shared.home,
-  localised_name = "Go Home",
-  localised_description = "Send the train to the Home station configured in player mod settings.",
-  -- linked_game_control = "",
   key_sequence = "H"
 }
 
@@ -104,9 +101,6 @@ local home = {
 local home_return = {
   type = "custom-input",
   name = shared.home_return,
-  localised_name = "Return to previous location",
-  localised_description = "Send the train to the location where it last traveled to home from.",
-  -- linked_game_control = "",
   key_sequence = "SHIFT + H"
 }
 
