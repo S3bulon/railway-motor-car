@@ -7,13 +7,22 @@ for prototype_name, prototype in pairs(data.raw["locomotive"]) do
     and not utils.table_contains(railway_motorcar_ignored, prototype_name)
   then
     -- use item with the same name
-    local prototype_item = data.raw["item-with-entity-data"][prototype_name]
+    local prototype_item = data.raw["item-with-entity-data"][prototype_name] or data.raw["item"][prototype_name]
     -- search item otherwise
     if not prototype_item or prototype_item.place_result ~= prototype_name then
       for _, rec in pairs(data.raw["item-with-entity-data"]) do
         if rec.place_result == prototype_name then
           prototype_item = rec
           break
+        end
+      end
+
+      if not prototype_item then
+        for _, rec in pairs(data.raw["item"]) do
+          if rec.place_result == prototype_name then
+            prototype_item = rec
+            break
+          end
         end
       end
     end
