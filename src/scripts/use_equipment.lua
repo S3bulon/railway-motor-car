@@ -99,20 +99,12 @@ local function mount(player)
   }
 
   if motorcar then
-    -- teleport close to position of the motorcar to allow entering (done in the base mod)
-    pos = player.surface.find_non_colliding_position("character", motorcar.position, 10, 0.1)
-    if not pos then
-      motorcar.destroy()
-      player.teleport(position)
-      player.create_local_flying_text({ text = { "flying-text."..shared.name.."-can-not-spawn" }, position = player.position })
-      return
-    end
-    player.teleport(pos)
-
     motorcar.color = player.color
 
     global.data[player.index].motorcar = motorcar
     global.data[player.index].mount = true
+    -- 1.1.87: cannot use mounting via base-mod anymore
+    motorcar.set_driver(player.character)
 
     -- load schedule, if needed
     if player.mod_settings[shared.keep_schedule].value and global.schedules[player.index] then
@@ -127,7 +119,7 @@ end
 --- @param player LuaPlayer
 local function can_mount(player)
   -- spidertron is standing on top of the rails - enter it instead of the train
-  if table_size(player.surface.find_entities_filtered({type = "spider-vehicle", position = player.position, radius = 3})) > 0 then
+  if table_size(player.surface.find_entities_filtered({type = "spider-vehicle", position = player.position, radius = 5})) > 0 then
     return false
   end
 
@@ -206,7 +198,7 @@ script.on_event(defines.events.on_player_driving_changed_state, function(event)
   -- manual mounting: check motorcar
   elseif data and data.mount then
     -- mounted another entity (e.g. a spidertron standing on top of the rail) -> destroy created motorcar
-    if not player.driving or not shared.is_a_motorcar(player.vehicle.name) then
+    if not player.driving or not shared.is_a_motorcar(player.vehicle.name) or not data.motorcar.get_driver() then
       data.motorcar.destroy()
       global.data[player.index] = nil
     end
@@ -221,6 +213,9 @@ script.on_event(defines.events.on_player_driving_changed_state, function(event)
     else
       -- any other change: cleanup (other mods should clean their entities themselves)
       global.data[player.index] = nil
+
+      -- There is a small chance that this mod creates a motorcar which cannot be mounted. And since it is unlinked, it will not be deleted.
+      -- But the player can enter the vehicle and link it.
     end
 
   -- mounting an unused motor car (possibly copied by other mods) -> link it
