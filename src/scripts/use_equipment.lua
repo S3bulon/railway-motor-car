@@ -103,13 +103,14 @@ local function mount(player)
 
     global.data[player.index].motorcar = motorcar
     global.data[player.index].mount = true
-    -- 1.1.87: cannot use mounting via base-mod anymore
-    motorcar.set_driver(player.character)
 
     -- load schedule, if needed
     if player.mod_settings[shared.keep_schedule].value and global.schedules[player.index] then
       motorcar.train.schedule = cleanup_schedule(motorcar, global.schedules[player.index], player.mod_settings[shared.keep_temporary].value)
     end
+
+    -- 1.1.87: cannot use mounting via base-mod anymore
+    motorcar.set_driver(player.character)
   else
     player.teleport(position)
   end
