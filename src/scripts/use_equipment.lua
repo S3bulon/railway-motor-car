@@ -119,9 +119,11 @@ end
 -- check if mounting is allowed
 --- @param player LuaPlayer
 local function can_mount(player)
-  -- spidertron is standing on top of the rails - enter it instead of the train
-  if table_size(player.surface.find_entities_filtered({type = "spider-vehicle", position = player.position, radius = 5})) > 0 then
-    return false
+  -- any driveable vehicle is standing on top of the rails - enter it instead of the train
+  for _, entity in pairs(player.surface.find_entities_filtered({type = {"spider-vehicle", "car", "locomotive"}, position = player.position, radius = 5})) do
+    if entity.prototype.allow_passengers then
+      return false
+    end
   end
 
   return compatibility.can_mount(player)
