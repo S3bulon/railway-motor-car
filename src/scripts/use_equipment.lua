@@ -77,6 +77,20 @@ local function cleanup_schedule(entity, schedule, keep_temporary)
   return table_size(schedule.records) > 0 and schedule or nil
 end
 
+--- check if any vehicle is close to the player
+---@param player LuaPlayer
+---@param check_driveable boolean check if the vehicles allow passengers
+local function is_vehicle_nearby(player, check_driveable)
+  local vehicles = player.surface.find_entities_filtered({type = {"spider-vehicle", "car", "locomotive"}, position = player.position, radius = 5})
+
+  for _, entity in pairs(vehicles) do
+    if not shared.is_a_motorcar(entity.name) and (not check_driveable or entity.prototype.allow_passengers) then
+      return true
+    end
+  end
+  return false
+end
+
 --- enter the vehicle
 ---@param player LuaPlayer
 local function mount(player)
@@ -99,6 +113,17 @@ local function mount(player)
   }
 
   if motorcar then
+
+    -- teleport close to position of the motorcar to allow entering (see below)
+    pos = player.surface.find_non_colliding_position("character", motorcar.position, 10, 0.1)
+    if not pos then
+      motorcar.destroy()
+      player.teleport(position)
+      player.create_local_flying_text({ text = { "flying-text."..shared.name.."-can-not-spawn" }, position = player.position })
+      return
+    end
+    player.teleport(pos)
+
     motorcar.color = player.color
 
     global.data[player.index].motorcar = motorcar
@@ -109,8 +134,12 @@ local function mount(player)
       motorcar.train.schedule = cleanup_schedule(motorcar, global.schedules[player.index], player.mod_settings[shared.keep_temporary].value)
     end
 
-    -- 1.1.87: cannot use mounting via base-mod anymore
-    motorcar.set_driver(player.character)
+    -- Factorio 1.1.87 executes a "toggle-driving"-event if any vehicle is nearby (even if it does not allow passengers), thus the driver must be set by the base-mod
+    -- otherwise the driver must be set manually
+    -- see https://forums.factorio.com/108553
+    if not is_vehicle_nearby(player, false) then
+      motorcar.set_driver(player.character)
+    end
   else
     player.teleport(position)
   end
@@ -120,10 +149,8 @@ end
 --- @param player LuaPlayer
 local function can_mount(player)
   -- any driveable vehicle is standing on top of the rails - enter it instead of the train
-  for _, entity in pairs(player.surface.find_entities_filtered({type = {"spider-vehicle", "car", "locomotive"}, position = player.position, radius = 5})) do
-    if entity.prototype.allow_passengers then
-      return false
-    end
+  if is_vehicle_nearby(player, true) then
+    return false
   end
 
   return compatibility.can_mount(player)
