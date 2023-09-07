@@ -79,9 +79,12 @@ end
 
 --- check if any vehicle is close to the player
 ---@param player LuaPlayer
+---@param position Position
 ---@param check_driveable boolean check if the vehicles allow passengers
-local function is_vehicle_nearby(player, check_driveable)
-  local vehicles = player.surface.find_entities_filtered({type = {"spider-vehicle", "car", "locomotive"}, position = player.position, radius = 5})
+local function is_vehicle_nearby(player, position, check_driveable)
+  -- using a smaller radius for checking all vehicles (when using set_driver instead of normal entering in #mount) - thanks to Kocou/XyuNaBlude
+  local radius = check_driveable and 5 or 3.6
+  local vehicles = player.surface.find_entities_filtered({type = {"spider-vehicle", "car", "locomotive"}, position = position, radius = radius})
 
   for _, entity in pairs(vehicles) do
     if not shared.is_a_motorcar(entity.name) and (not check_driveable or entity.prototype.allow_passengers) then
@@ -137,7 +140,7 @@ local function mount(player)
     -- Factorio 1.1.87 executes a "toggle-driving"-event if any vehicle is nearby (even if it does not allow passengers), thus the driver must be set by the base-mod
     -- otherwise the driver must be set manually
     -- see https://forums.factorio.com/108553
-    if not is_vehicle_nearby(player, false) then
+    if not is_vehicle_nearby(player, position,false) then
       motorcar.set_driver(player.character)
     end
   else
@@ -149,7 +152,7 @@ end
 --- @param player LuaPlayer
 local function can_mount(player)
   -- any driveable vehicle is standing on top of the rails - enter it instead of the train
-  if is_vehicle_nearby(player, true) then
+  if is_vehicle_nearby(player, player.position, true) then
     return false
   end
 
