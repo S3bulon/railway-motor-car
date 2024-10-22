@@ -72,15 +72,16 @@ for prototype_name, prototype in pairs(data.raw["locomotive"]) do
         type = "recipe",
         name = name,
         localised_name = motorcar.localised_name,
-        normal = {
-          enabled = false,
-          ingredients = {
-            {"advanced-circuit", 10},
-            {prototype_item.name, 1},
-          },
-          result = name,
-          energy_consumption = 4,
+        enabled = false,
+        ingredients = {
+          {type="item", name="advanced-circuit", amount=10},
+          {type="item", name=prototype_item.name, amount=1},
         },
+        results = {{
+          type = "item",
+          name = name,
+          amount = 1
+        }},
         order = "g-h-a"
       }
 

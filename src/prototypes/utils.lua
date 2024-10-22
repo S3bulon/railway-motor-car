@@ -3,6 +3,17 @@ local utils = require("global-utils")
 function utils.scale(layer, shiftX, shiftY)
   if not layer then
     return
+
+  elseif layer.rotated then
+    utils.scale(layer.rotated, shiftX, shiftY)
+    utils.scale(layer.sloped, shiftX, shiftY)
+    return
+
+  elseif layer.layers then
+    for _, l in pairs(layer.layers) do
+      utils.scale(l, shiftX, shiftY)
+    end
+    return
   end
 
   layer.scale = (layer.scale or 1) * 0.5
@@ -31,6 +42,10 @@ function utils.create_entity(prototype_name, name, nuclear)
   motorcar.name = name
   motorcar.corpse = shared.corpse
 
+  motorcar.order = "g-h-a[" .. name .. "]"
+  motorcar.subgroup = "equipment"
+  -- todo factoriopedia simulation
+
   -- cannot be mined or deconstructed
   motorcar.minable = nil
   motorcar.flags = {"player-creation", "placeable-off-grid", "not-blueprintable", "not-deconstructable"}
@@ -55,6 +70,8 @@ function utils.create_entity(prototype_name, name, nuclear)
   -- no power source (use equipment)
   motorcar.energy_source = {type = "void"}
 
+  -- todo: use quality to increase speed
+
   -- smaller version of the train
   --motorcar.collision_box = { { -0.3, -1.3 }, { 0.3, 1.3 } }
   motorcar.collision_box = {{-0.6, -2.1}, {0.6, 2.1}}
@@ -63,26 +80,20 @@ function utils.create_entity(prototype_name, name, nuclear)
   motorcar.joint_distance = 2
   motorcar.vertical_selection_shift = -0.25
 
-  -- Some entities might not have multiple layers
-  if motorcar["pictures"]["layers"] then
-    for _, layer in pairs(motorcar.pictures.layers or {}) do
-      utils.scale(layer, 0, 0.2)
-    end
-  else
-    utils.scale(motorcar.pictures)
-  end
-
+  utils.scale(motorcar.pictures, 0, 0.2)
   utils.scale(motorcar.wheels, 0, 0.35)
 
   for _, layer in pairs(motorcar.front_light or {}) do
     utils.scale(layer, 0, -6.0)
   end
 
-  for _, layer in pairs(motorcar.front_light_pictures and motorcar.front_light_pictures.layers or {}) do
+  utils.scale(motorcar.front_light_pictures, 0, 0.2)
+
+  for _, layer in pairs(motorcar.back_light or {}) do
     utils.scale(layer, 0, 0.2)
   end
 
-  for _, layer in pairs(motorcar.back_light or {}) do
+  for _, layer in pairs(motorcar.stand_by_light or {}) do
     utils.scale(layer, 0, 0.2)
   end
 
@@ -107,9 +118,16 @@ function utils.create_equipment(name, nuclear)
   local equipment = table.deepcopy(data.raw["battery-equipment"]["battery-equipment"])
 
   equipment.name = name
-  equipment.sprite.filename = motorcar.icon or motorcar.icons[1].icon
-  equipment.sprite.width = motorcar.icon_size or motorcar.icons[1].icon_size
-  equipment.sprite.height = motorcar.icon_size or motorcar.icons[1].icon_size
+
+  if motorcar.icons then
+    equipment.sprite.filename = motorcar.icons[1].icon
+    equipment.sprite.width = motorcar.icons[1].icon_size
+    equipment.sprite.height = motorcar.icons[1].icon_size
+  else
+    equipment.sprite.filename = motorcar.icon
+    equipment.sprite.size = motorcar.icon_size or 64 -- icons may have no size anymore -> use 64 which is the default icon size
+    equipment.sprite.scale = 1
+  end
   equipment.sprite.hr_version = nil
   equipment.shape.width = 2
   equipment.shape.height = 2
@@ -119,7 +137,7 @@ function utils.create_equipment(name, nuclear)
     usage_priority = "secondary-input",
   }
   equipment.take_result = name
-  equipment.order = "g-h-a"
+  equipment.order = motorcar.order
 
   if nuclear then
     equipment.energy_source.input_flow_limit = "600kW"
@@ -137,11 +155,12 @@ function utils.create_item(name)
   local item = table.deepcopy(data.raw["item"]["battery-equipment"])
 
   item.name = name
+  item.localised_name = {"item-name." .. name} -- this is somehow equipment-name.battery-equipment, not item-name...??
   item.icon = motorcar.icon
   item.icons = motorcar.icons
   item.icon_size = motorcar.icon_size
-  item.placed_as_equipment_result = name
-  item.order = "g-h-a"
+  item.place_as_equipment_result = name
+  item.order = motorcar.order
 
   return item
 end

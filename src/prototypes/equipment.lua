@@ -13,16 +13,17 @@ local nuclear_item = utils.create_item(shared.nuclear_motorcar)
 local base_recipe = {
   type = "recipe",
   name = shared.base_motorcar,
-  normal = {
-    enabled = false,
-    ingredients = {
-      { "electric-engine-unit", 20 },
-      { "steel-plate", 30 },
-      { "advanced-circuit", 10 },
-    },
-    result = shared.base_motorcar,
-    energy_consumption = 4,
+  enabled = false,
+  ingredients = {
+    { type="item", name="electric-engine-unit", amount=20 },
+    { type="item", name="steel-plate", amount=30 },
+    { type="item", name="advanced-circuit", amount=10 },
   },
+  results = {{
+    type = "item",
+    name = shared.base_motorcar,
+    amount = 1
+  }},
   icon = base_motorcar.icon,
   icon_size = base_motorcar.icon_size,
   order = "g-h-a"
@@ -30,13 +31,13 @@ local base_recipe = {
 
 local nuclear_recipe = table.deepcopy(base_recipe)
 nuclear_recipe.name = shared.nuclear_motorcar
-nuclear_recipe.normal.ingredients = {
-  { "electric-engine-unit", 20 },
-  { "steel-plate", 30 },
-  { "advanced-circuit", 10 },
-  { "nuclear-fuel", 5 }
+nuclear_recipe.ingredients = {
+  { type="item", name="electric-engine-unit", amount=20 },
+  { type="item", name="steel-plate", amount=30 },
+  { type="item", name="advanced-circuit", amount=10 },
+  { type="item", name="nuclear-fuel", amount=5 }
 }
-nuclear_recipe.normal.result = shared.nuclear_motorcar
+nuclear_recipe.results[1].name = shared.nuclear_motorcar
 nuclear_recipe.icon = nuclear_motorcar.icon
 nuclear_recipe.icon_size = nuclear_motorcar.icon_size
 

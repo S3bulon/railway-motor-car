@@ -12,7 +12,7 @@ function compatibility.can_mount(player)
   end
 
   -- train tunnels: cannot mount b/c <enter vehicle> is used for changing surfaces
-  if game.active_mods["traintunnels"] and table_size(player.surface.find_entities_filtered({
+  if script.active_mods["traintunnels"] and table_size(player.surface.find_entities_filtered({
     position = player.position,
     radius = 10, -- large radius
     name = { "traintunnel", "traintunnelup", "traintunneldown" }
@@ -32,6 +32,16 @@ function compatibility.ignore_tick(player)
   end
 
   return false
+end
+
+-- return the supported rails to detect entering the motorcar
+function compatibility.rails()
+  return {
+    -- default rails
+    "straight-rail", "curved-rail-a", "curved-rail-b", "half-diagonal-rail",
+    -- elevated rails
+    "elevated-straight-rail", "elevated-curved-rail-a", "elevated-curved-rail-b", "elevated-half-diagonal-rail"
+  }
 end
 
 return compatibility
