@@ -192,6 +192,11 @@ end
 -- "enter vehicle"-button
 script.on_event(shared.key, function(event)
   local player = game.get_player(event.player_index)
+  -- ignore in remote view
+  if player.controller_type ~= player.physical_controller_type then
+    return
+  end
+
   if player.character then
     if player.physical_vehicle and storage.data[event.player_index] and storage.data[event.player_index].motorcar then
       -- unmount (also allowed if equipment is unequipped)
@@ -209,6 +214,11 @@ end)
 -- event for entering or leaving a vehicle (via base-mod)
 script.on_event(defines.events.on_player_driving_changed_state, function(event)
   local player = game.get_player(event.player_index)
+  -- ignore in remote view
+  if player.controller_type ~= player.physical_controller_type then
+    return
+  end
+
   local data = storage.data[player.index]
 
   -- manual unmounting: remove motorcar
@@ -272,6 +282,11 @@ end)
 -- pressing "rotate" while in motorcar without selection -> rotate motorcar
 script.on_event(shared.rotate, function(event)
   local player = game.get_player(event.player_index)
+  -- ignore in remote view
+  if player.controller_type ~= player.physical_controller_type then
+    return
+  end
+
   if not player.selected then
     ---@type LuaEntity
     local motorcar = storage.data[player.index] and storage.data[player.index].motorcar
@@ -284,6 +299,11 @@ end)
 -- pressing "H" while in motorcar will send the motorcar to the players "Home" station
 script.on_event(shared.home, function(event)
   local player = game.get_player(event.player_index)
+  -- ignore in remote view
+  if player.controller_type ~= player.physical_controller_type then
+    return
+  end
+
   ---@type LuaEntity
   local motorcar = storage.data[player.index] and storage.data[player.index].motorcar
 
@@ -364,6 +384,11 @@ end)
 -- pressing "shift+H" while in motorcar will send the motorcar back to where the player went home from
 script.on_event(shared.home_return, function(event)
   local player = game.get_player(event.player_index)
+  -- ignore in remote view
+  if player.controller_type ~= player.physical_controller_type then
+    return
+  end
+
   ---@type LuaEntity
   local motorcar = storage.data[player.index] and storage.data[player.index].motorcar
   local return_schedule = storage.return_schedule[player.index]
@@ -418,13 +443,15 @@ script.on_nth_tick(30, function(event)
     if invalid then
       -- player is still active and driving -> unmount
       if player.character and player.physical_vehicle then
-        if storage.data[player.index].equipment and storage.data[player.index].equipment.valid and storage.data[player.index].equipment.energy == 0 then
-          player.create_local_flying_text({ text = { "flying-text."..shared.name.."-no-power" }, position = player.position })
-        else
-          player.create_local_flying_text({ text = { "flying-text."..shared.name.."-missing-equipment" }, position = player.position })
+        if player.controller_type == player.physical_controller_type then -- ignore in remote view to not drop the player on the rails
+          if storage.data[player.index].equipment and storage.data[player.index].equipment.valid and storage.data[player.index].equipment.energy == 0 then
+            player.create_local_flying_text({ text = { "flying-text."..shared.name.."-no-power" }, position = player.position })
+          else
+            player.create_local_flying_text({ text = { "flying-text."..shared.name.."-missing-equipment" }, position = player.position })
+          end
+          unmount(player)
+          player.driving = false
         end
-        unmount(player)
-        player.driving = false
       elseif not storage.data[player.index].motorcar.valid then
         -- invalid by any unknown cause -> simply remove link
         storage.data[player.index] = nil
