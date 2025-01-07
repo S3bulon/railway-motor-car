@@ -35,6 +35,7 @@ local function hasEquipment(player)
       end
 
       storage.data[player.index].armor = armor
+      storage.data[player.index].flying = armor.prototype.provides_flight
       storage.data[player.index].equipment = equipment
       return true
     end
@@ -99,13 +100,16 @@ end
 local function mount(player)
   local position = player.position
   local direction = player.character.direction
-  -- teleport character to any position to make space for creating the entity
-  local pos = player.physical_surface.find_non_colliding_position("character", position, 100, 10)
-  if not pos then
-    player.create_local_flying_text({ text = { "flying-text."..shared.name.."-can-not-spawn" }, position = player.position })
-    return
+
+  if not storage.data[player.index].flying then
+    -- teleport character to any position to make space for creating the entity
+    local pos = player.physical_surface.find_non_colliding_position("character", position, 100, 10)
+    if not pos then
+      player.create_local_flying_text({ text = { "flying-text."..shared.name.."-can-not-spawn" }, position = player.position })
+      return
+    end
+    player.teleport(pos)
   end
-  player.teleport(pos)
 
   ---@type LuaEntity
   local motorcar = player.physical_surface.create_entity {
@@ -118,15 +122,17 @@ local function mount(player)
 
   if motorcar then
 
-    -- teleport close to position of the motorcar to allow entering (see below)
-    pos = player.physical_surface.find_non_colliding_position("character", motorcar.position, 10, 0.1)
-    if not pos then
-      motorcar.destroy()
-      player.teleport(position)
-      player.create_local_flying_text({ text = { "flying-text."..shared.name.."-can-not-spawn" }, position = player.position })
-      return
+    if not storage.data[player.index].flying then
+      -- teleport close to position of the motorcar to allow entering (see below)
+      local pos = player.physical_surface.find_non_colliding_position("character", motorcar.position, 10, 0.1)
+      if not pos then
+        motorcar.destroy()
+        player.teleport(position)
+        player.create_local_flying_text({ text = { "flying-text."..shared.name.."-can-not-spawn" }, position = player.position })
+        return
+      end
+      player.teleport(pos)
     end
-    player.teleport(pos)
 
     motorcar.color = player.color
 
@@ -232,9 +238,11 @@ script.on_event(defines.events.on_player_driving_changed_state, function(event)
       end
 
       data.motorcar.destroy()
-      -- move character to close place as before (not the same in case the player uses e.g. elevated rails)
-      local new_pos = player.physical_surface.find_non_colliding_position("character", data.unmount, 10, 0.1)
-      player.character.teleport(new_pos)
+      if not storage.data[player.index].flying then
+        -- move character to close place as before (not the same in case the player uses e.g. elevated rails)
+        local new_pos = player.physical_surface.find_non_colliding_position("character", data.unmount, 10, 0.1)
+        player.character.teleport(new_pos)
+      end
       storage.data[player.index] = nil
     else
       -- otherwise: invalid -> reset

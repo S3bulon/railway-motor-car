@@ -1,4 +1,10 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.5.2
+Date: 07.01.2025
+  Fixes:
+    - Fix Exception when mounting the motorcar while wearing armor which provides flight (e.g. mech armor from SA)
+    - Allow mounting the motorcar while flying (e.g. when flying over an ocean)
+---------------------------------------------------------------------------------------------------
 Version: 0.5.1
 Date: 30.11.2024
   Fixes:
