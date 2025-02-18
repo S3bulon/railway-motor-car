@@ -101,14 +101,14 @@ local function mount(player)
   local position = player.position
   local direction = player.character.direction
 
-  if not storage.data[player.index].flying then
-    -- teleport character to any position to make space for creating the entity
-    local pos = player.physical_surface.find_non_colliding_position("character", position, 100, 10)
-    if not pos then
-      player.create_local_flying_text({ text = { "flying-text."..shared.name.."-can-not-spawn" }, position = player.position })
-      return
-    end
+  -- teleport character to any position to make space for creating the entity
+  local pos = player.physical_surface.find_non_colliding_position("character", position, 100, 10)
+  if pos then
     player.teleport(pos)
+    -- no position found and no flying armor -> cannot spawn motorcar
+  elseif not storage.data[player.index].flying then
+    player.create_local_flying_text({text = {"flying-text." .. shared.name .. "-can-not-spawn"}, position = player.position})
+    return
   end
 
   ---@type LuaEntity
@@ -121,17 +121,15 @@ local function mount(player)
   }
 
   if motorcar then
-
-    if not storage.data[player.index].flying then
-      -- teleport close to position of the motorcar to allow entering (see below)
-      local pos = player.physical_surface.find_non_colliding_position("character", motorcar.position, 10, 0.1)
-      if not pos then
-        motorcar.destroy()
-        player.teleport(position)
-        player.create_local_flying_text({ text = { "flying-text."..shared.name.."-can-not-spawn" }, position = player.position })
-        return
-      end
+    -- teleport close to position of the motorcar to allow entering (see below)
+    local pos = player.physical_surface.find_non_colliding_position("character", motorcar.position, 10, 0.1)
+    if pos then
       player.teleport(pos)
+    elseif not storage.data[player.index].flying then
+      motorcar.destroy()
+      player.teleport(position)
+      player.create_local_flying_text({text = {"flying-text." .. shared.name .. "-can-not-spawn"}, position = player.position})
+      return
     end
 
     motorcar.color = player.color

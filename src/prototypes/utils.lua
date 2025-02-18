@@ -35,6 +35,8 @@ function utils.scale(layer, shiftX, shiftY)
   end
 end
 
+local overlay_icon = data.raw["technology"]["battery-equipment"].icons[2]
+
 function utils.create_entity(prototype_name, name, nuclear)
   ---@type Prototype_Locomotive
   local motorcar = table.deepcopy(data.raw["locomotive"][prototype_name])
@@ -80,6 +82,20 @@ function utils.create_entity(prototype_name, name, nuclear)
   motorcar.joint_distance = 2
   motorcar.vertical_selection_shift = -0.25
 
+  motorcar.icons = {
+    {
+      icon = motorcar.icon,
+      icon_size = motorcar.icon_size or 64, -- icons may have no size anymore -> use 64 which is the default icon size
+      scale = 2
+    },
+    {
+      icon = overlay_icon.icon,
+      icon_size = overlay_icon.icon_size,
+      scale = 0.5,
+      shift = {-32, 32} -- move to bottom left to prevent overlapping with the counter
+    }
+  }
+
   utils.scale(motorcar.pictures, 0, 0.2)
   utils.scale(motorcar.wheels, 0, 0.35)
 
@@ -119,15 +135,12 @@ function utils.create_equipment(name, nuclear)
 
   equipment.name = name
 
-  if motorcar.icons then
-    equipment.sprite.filename = motorcar.icons[1].icon
-    equipment.sprite.width = motorcar.icons[1].icon_size
-    equipment.sprite.height = motorcar.icons[1].icon_size
-  else
-    equipment.sprite.filename = motorcar.icon
-    equipment.sprite.size = motorcar.icon_size or 64 -- icons may have no size anymore -> use 64 which is the default icon size
-    equipment.sprite.scale = 1
-  end
+  -- only need the first icon
+  equipment.sprite.filename = motorcar.icons[1].icon
+  equipment.sprite.width = motorcar.icons[1].icon_size
+  equipment.sprite.height = motorcar.icons[1].icon_size
+  equipment.sprite.scale = motorcar.icons[1].scale
+
   equipment.sprite.hr_version = nil
   equipment.shape.width = 2
   equipment.shape.height = 2
@@ -156,9 +169,7 @@ function utils.create_item(name)
 
   item.name = name
   item.localised_name = {"item-name." .. name} -- this is somehow equipment-name.battery-equipment, not item-name...??
-  item.icon = motorcar.icon
   item.icons = motorcar.icons
-  item.icon_size = motorcar.icon_size
   item.place_as_equipment_result = name
   item.order = motorcar.order
 

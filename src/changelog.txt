@@ -1,4 +1,14 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.6.0
+Date: 18.02.2025
+  Features (thanks to ST-DDT):
+    - Improved recipe of nuclear motorcar to consume the normal motorcar
+    - Made the "Electric Engine"-technology a prerequisite to the motorcar-technology because it is required to build the equipment
+    - Added an icon-overlay for the motorcar item & technology for a better distinction between the normal locomotive and the motorcar
+      - removed the dependency to flib which was used for the same feature
+  Fixes:
+    - Fixed not being able to mount the motorcar while wearing a flight-armor
+---------------------------------------------------------------------------------------------------
 Version: 0.5.2
 Date: 07.01.2025
   Fixes:

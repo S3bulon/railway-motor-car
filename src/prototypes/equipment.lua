@@ -24,28 +24,24 @@ local base_recipe = {
     name = shared.base_motorcar,
     amount = 1
   }},
-  icon = base_motorcar.icon,
-  icon_size = base_motorcar.icon_size,
+  icons = base_motorcar.icons,
   order = "g-h-a"
 }
 
 local nuclear_recipe = table.deepcopy(base_recipe)
 nuclear_recipe.name = shared.nuclear_motorcar
 nuclear_recipe.ingredients = {
-  { type="item", name="electric-engine-unit", amount=20 },
-  { type="item", name="steel-plate", amount=30 },
-  { type="item", name="advanced-circuit", amount=10 },
+  { type="item", name=shared.base_motorcar, amount=1 },
   { type="item", name="nuclear-fuel", amount=5 }
 }
 nuclear_recipe.results[1].name = shared.nuclear_motorcar
-nuclear_recipe.icon = nuclear_motorcar.icon
-nuclear_recipe.icon_size = nuclear_motorcar.icon_size
+nuclear_recipe.icons = nuclear_motorcar.icons
 
 ---@type Prototype_Technology
 local base_technology = {
   type = "technology",
   name = shared.base_motorcar,
-  prerequisites = { "railway", "solar-panel-equipment" },
+  prerequisites = { "electric-engine", "railway", "solar-panel-equipment" },
   effects = {
     {
       type = "unlock-recipe",
@@ -61,16 +57,14 @@ local base_technology = {
     },
     time = 30,
   },
-  icon = base_motorcar.icon,
-  icon_size = base_motorcar.icon_size,
+  icons = base_motorcar.icons,
   order = "g-h-a"
 }
 
 local nuclear_technology = table.deepcopy(base_technology)
 nuclear_technology.name = shared.nuclear_motorcar
 nuclear_technology.effects[1].recipe = shared.nuclear_motorcar
-nuclear_technology.icon = nuclear_motorcar.icon
-nuclear_technology.icon_size = nuclear_motorcar.icon_size
+nuclear_technology.icons = nuclear_motorcar.icons
 nuclear_technology.prerequisites = {shared.base_motorcar, "kovarex-enrichment-process" }
 
 ---@type Prototype_CustomInput

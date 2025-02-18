@@ -1,5 +1,4 @@
 local utils = require("prototypes.utils")
-local flib = mods["flib"] and require( "__flib__.data-util")
 
 -- check for modded locomotives and create equipment & entity for them
 for prototype_name, prototype in pairs(data.raw["locomotive"]) do
@@ -40,6 +39,21 @@ for prototype_name, prototype in pairs(data.raw["locomotive"]) do
       table.insert(localised_name, ")")
       motorcar.localised_name = localised_name
 
+      if prototype_item.icons then
+        motorcar.icons[1] = {
+          icon = prototype_item.icons[1].icon,
+          icon_size = prototype_item.icons[1].icon_size or 64,
+          -- original is fixed at 128 - scale accordingly
+          scale = 128 / ((prototype_item.icons[1].icon_size or 64) * (prototype_item.icons[1].scale or 1))
+        }
+      else
+        motorcar.icons[1] = {
+          icon = prototype_item.icon,
+          icon_size = prototype_item.icon_size or 64,
+          scale = 128 / (prototype_item.icon_size or 64)
+        }
+      end
+
       data:extend {motorcar}
 
       local equipment = utils.create_equipment(name, true)
@@ -48,25 +62,6 @@ for prototype_name, prototype in pairs(data.raw["locomotive"]) do
       local item = utils.create_item(name)
       item.localised_name = motorcar.localised_name
       item.localised_description = {"item-description." .. shared.base_motorcar}
-
-      if flib then
-        -- with flib: Generate icons with overlay
-        local motorcar_icon = {
-          {
-            icon = shared.root .. "/graphics/equipment/motorcar_overlay.png",
-            icon_size = 64,
-            tint = {r=1, g=1, b=1, a=1}
-          }
-        }
-        item.icons = flib.create_icons(prototype, motorcar_icon) or motorcar_icon
-        item.icon = nil
-        item.icon_size = nil
-      else
-        -- fallback: copy icon of the original b/c they are dynamic
-        item.icon = prototype_item.icon
-        item.icon_size = prototype_item.icon_size
-        item.icons = prototype_item.icons
-      end
 
       local recipe = {
         type = "recipe",
