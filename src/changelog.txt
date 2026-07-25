@@ -1,4 +1,12 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.7.0
+Date: 25.07.2026
+  Features:
+    - Update to Factorio 2.1
+    - Update to Jetpack 0.5.1
+  Compatibility:
+    - Do not use waterways of "Cargo Ships"-Mod
+---------------------------------------------------------------------------------------------------
 Version: 0.6.0
 Date: 18.02.2025
   Features (thanks to ST-DDT):
