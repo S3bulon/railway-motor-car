@@ -50,6 +50,7 @@ function utils.create_entity(prototype_name, name, nuclear)
 
   -- cannot be mined or deconstructed
   motorcar.minable = nil
+  motorcar.next_upgrade = nil
   motorcar.flags = {"player-creation", "placeable-off-grid", "not-blueprintable", "not-deconstructable"}
   -- smaller with less power, but faster braking
   motorcar.max_health = 100
